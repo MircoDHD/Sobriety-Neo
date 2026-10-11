@@ -17,6 +17,7 @@ import com.katiearose.sobriety.utils.getDateFormatPattern
 import com.katiearose.sobriety.utils.getAverageAttemptsWindow
 import com.katiearose.sobriety.utils.getSharedPref
 import com.katiearose.sobriety.utils.savingsCardText
+import com.katiearose.sobriety.utils.cardTimeText
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -171,26 +172,14 @@ class AddictionCardAdapter(
             binding.textViewSavings.text = text
         }
 
-        /** Sets the big counter text, which depends on the status of the addiction. */
+        /**
+         * Sets the big counter text. It depends on the status of the addiction and on its display
+         * options (counter, countdown to the next milestone or both; precision), see
+         * cardTimeText() in TimeFormat.kt.
+         */
         private fun displayInfo() {
             displaySavings()
-            binding.textViewTime.text = when (addiction.status) {
-                // Running: time since the last relapse.
-                Addiction.Status.Ongoing -> binding.root.context.convertRangeToString(addiction.history.keys.last())
-
-                // Stopped: the counter is frozen at the time it was stopped.
-                Addiction.Status.Stopped -> binding.root.context.getString(
-                    R.string.stop_notice,
-                    getFormattedDate(addiction.history.values.last()),
-                    binding.root.context.convertRangeToString(addiction.history.keys.last(), addiction.history.values.last())
-                )
-
-                // Waiting: time left until the start.
-                Addiction.Status.Future -> binding.root.context.getString(
-                    R.string.time_until_tracked,
-                    binding.root.context.convertRangeToString(System.currentTimeMillis(), addiction.history.keys.last())
-                )
-            }
+            binding.textViewTime.text = binding.root.context.cardTimeText(addiction)
         }
 
         /**

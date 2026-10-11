@@ -57,14 +57,62 @@
         <item>dd MMM uuuu</item>
     </string-array>
 
-    <!-- Sobriety Neo: order must match SavingCategory and RatePeriod in the shared module. -->
+    <!-- Sobriety Neo. saving_categories: order is used in Savings.kt / SavingsAdapter.kt.
+         rate_periods, counter_modes, time_unit_levels: order must match the enums
+         RatePeriod, CounterMode and TimeUnitLevel in the shared module. -->
     <string-array name="saving_categories">
         <item>@string/saving_category_money</item>
+        <item>@string/saving_category_time</item>
         <item>@string/saving_category_other</item>
+    </string-array>
+    <string-array name="counter_modes">
+        <item>@string/mode_counter</item>
+        <item>@string/mode_milestone</item>
+        <item>@string/mode_both</item>
+    </string-array>
+    <!-- index 0 = no limit, index n = n units -->
+    <string-array name="max_units">
+        <item>@string/max_units_all</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="time_unit_levels">
+        <item>@string/unit_year</item>
+        <item>@string/unit_month</item>
+        <item>@string/unit_week</item>
+        <item>@string/unit_day</item>
+        <item>@string/unit_hour</item>
+        <item>@string/unit_minute</item>
+        <item>@string/unit_second</item>
+    </string-array>
+    <string-array name="card_sort_entries">
+        <item>@string/sort_priority</item>
+        <item>@string/sort_streak_desc</item>
+        <item>@string/sort_streak_asc</item>
+        <item>@string/sort_name</item>
+    </string-array>
+    <string-array name="card_sort_values" translatable="false">
+        <item>priority</item>
+        <item>streak_desc</item>
+        <item>streak_asc</item>
+        <item>name</item>
     </string-array>
     <string-array name="rate_periods">
         <item>@string/rate_day</item>
         <item>@string/rate_week</item>
         <item>@string/rate_month</item>
+    </string-array>
+    <!-- Order must match TabRule in src/neo/.../utils/TabStore.kt -->
+    <string-array name="tab_rules">
+        <item>@string/rule_none</item>
+        <item>@string/rule_high</item>
+        <item>@string/rule_medium</item>
+        <item>@string/rule_low</item>
+        <item>@string/rule_ongoing</item>
+        <item>@string/rule_stopped</item>
     </string-array>
 </resources>

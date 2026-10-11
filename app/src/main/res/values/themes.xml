@@ -15,6 +15,21 @@
         <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
     </style>
 
+    <!--
+      Sobriety Neo, new UI: "True black (AMOLED)". Applied on top of the normal dark theme
+      (see applyThemes() in Utils.kt), only when dark mode is active. Black pixels are switched
+      off on OLED screens, which looks deep and saves battery.
+    -->
+    <style name="ThemeOverlay.Sobriety.Amoled" parent="">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="colorSurface">#FF000000</item>
+        <item name="cardColor">#FF141014</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="colorPrimaryVariant">#FF000000</item>
+    </style>
+
     <style name="Theme.Sobriety.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
     <style name="Theme.Sobriety.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

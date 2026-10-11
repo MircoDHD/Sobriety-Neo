@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row on the "Manage tabs" screen: name, how it is filled, and buttons. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="16dp"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tab_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="High priority" />
+
+            <TextView
+                android:id="@+id/tab_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                tools:text="Automatic: high priority · 2 added by hand" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_up"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="@drawable/ripple"
+            android:contentDescription="@string/move_up"
+            android:tooltipText="@string/move_up"
+            android:src="@drawable/expand_less_24px" />
+
+        <ImageView
+            android:id="@+id/btn_down"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="@drawable/ripple"
+            android:contentDescription="@string/move_down"
+            android:tooltipText="@string/move_down"
+            android:src="@drawable/expand_more_24px" />
+
+        <ImageView
+            android:id="@+id/btn_edit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="@drawable/ripple"
+            android:contentDescription="@string/edit"
+            android:tooltipText="@string/edit"
+            android:src="@drawable/edit_note_24px" />
+
+        <ImageView
+            android:id="@+id/btn_delete"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:background="@drawable/ripple"
+            android:contentDescription="@string/delete"
+            android:tooltipText="@string/delete"
+            android:src="@drawable/ic_baseline_delete_24" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

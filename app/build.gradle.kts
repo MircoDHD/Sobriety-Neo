@@ -17,9 +17,31 @@ android {
         minSdk = 21
         targetSdk = 33
         // Increase versionCode with every release, otherwise Android refuses to update the app.
-        versionCode = 24
-        versionName = "v10.2.0-neo.1-preview"
+        versionCode = 25
+        versionName = "v11.0.0-neo.1-preview"
         setProperty("archivesBaseName", "Sobriety-Neo-$versionName")
+    }
+
+    // Sobriety Neo comes in two variants ("flavors") that share all data logic and most screens:
+    //  - neo:     the new user interface (tabs, new cards, more options). This is the main app and
+    //             keeps the app id, so an installed Sobriety Neo is updated to it.
+    //  - classic: the user interface of the original app, as an extra app ("Sobriety Neo Classic")
+    //             with its own app id, so both can be installed side by side.
+    // Code and resources only used by one variant live in src/neo and src/classic; everything else
+    // is in src/main. Each variant has its own activities/Main.kt. BuildConfig.NEW_UI tells shared
+    // code which variant is running.
+    flavorDimensions += "ui"
+    productFlavors {
+        create("neo") {
+            dimension = "ui"
+            buildConfigField("boolean", "NEW_UI", "true")
+        }
+        create("classic") {
+            dimension = "ui"
+            applicationIdSuffix = ".classic"
+            versionNameSuffix = "-classic"
+            buildConfigField("boolean", "NEW_UI", "false")
+        }
     }
 
     signingConfigs {
@@ -87,6 +109,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.5.1")
     implementation("com.google.android.material:material:1.7.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    // Swipeable tabs of the new UI.
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation("androidx.preference:preference-ktx:1.2.0")
     //required for AndroidX Preference library
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")

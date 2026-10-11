@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Classic variant: own app name, so both variants can be told apart on the home screen. -->
+<resources>
+    <string name="app_name">Sobriety Neo Classic</string>
+</resources>

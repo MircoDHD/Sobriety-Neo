@@ -2,6 +2,8 @@ package com.katiearose.sobriety.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
+import com.katiearose.sobriety.BuildConfig
 import android.os.SystemClock
 import android.view.View
 import android.widget.TextView
@@ -168,6 +170,11 @@ fun Activity.applyThemes() {
     if (preferences.getBoolean("material_you", false)) {
         setTheme(R.style.Theme_Sobriety_Material3)
     } else setTheme(R.style.Theme_Sobriety)
+    // Sobriety Neo, new UI: true black backgrounds in dark mode.
+    val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    if (BuildConfig.NEW_UI && night && preferences.getBoolean("amoled_black", false)) {
+        theme.applyStyle(R.style.ThemeOverlay_Sobriety_Amoled, true)
+    }
 }
 
 /**
@@ -191,7 +198,7 @@ fun Activity.checkValidIntentData() : Int {
  */
 fun Activity.loadAddictionFromIntent(): Addiction? {
     val index = checkValidIntentData()
-    if (Main.addictions.isEmpty()) Main.addictions.addAll(CacheHandler(this).loadFromDisk())
+    if (Trackers.ensureLoaded(this)) CacheHandler(this).write()
     return Main.addictions.getOrNull(index)
 }
 

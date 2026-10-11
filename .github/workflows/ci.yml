@@ -107,7 +107,7 @@ jobs:
       uses: actions/upload-artifact@v5
       with:
         name: Sobriety-Neo-debug-apk
-        path: app/build/outputs/apk/debug/*.apk
+        path: app/build/outputs/apk/*/debug/*.apk
 
     # Publishes the APK on the Releases page, for pushes to master and for builds started by hand
     # ("Run workflow" in the Actions tab, which also works for other branches). Pushes to other
@@ -120,9 +120,12 @@ jobs:
         target_commitish: ${{ github.sha }}
         name: Build ${{ github.run_number }} (${{ github.ref_name }})
         prerelease: true
-        files: app/build/outputs/apk/debug/*.apk
+        files: app/build/outputs/apk/*/debug/*.apk
         body: |
           Test build of branch `${{ github.ref_name }}` (commit ${{ github.sha }}).
+          Two variants (download one or both, they can be installed side by side):
+          - `...-neo-debug.apk`: Sobriety Neo with the new look (main app)
+          - `...-classic-debug.apk`: Sobriety Neo Classic, the original look
           Download the `.apk` file below and install it on an Android phone.
           The app can be installed next to the original Sobriety app. Use "Export" in the
           settings of the old app and "Import" in this one to take your data along.

@@ -32,6 +32,11 @@ import com.katiearose.sobriety.shared.CacheHandler
 import com.katiearose.sobriety.shared.RelapseCost
 import com.katiearose.sobriety.shared.primaryCurrency
 import com.katiearose.sobriety.utils.DiagnosticsLog
+import com.katiearose.sobriety.utils.showRelapseSheet
+import com.katiearose.sobriety.utils.showNoteAfterRelapseIfEnabled
+import com.katiearose.sobriety.utils.DefaultMilestones
+import com.katiearose.sobriety.utils.Trackers
+import com.katiearose.sobriety.utils.showDisplayOptionsDialog
 import com.katiearose.sobriety.utils.handleInfoMenuItem
 import com.katiearose.sobriety.utils.setInfoClick
 import com.katiearose.sobriety.utils.toDoubleLenient
@@ -59,17 +64,15 @@ class Main : AppCompatActivity() {
         /** A counter update that takes longer than this is counted as "slow" in the diagnostics. */
         private const val SLOW_TICK_MS = 16L
 
-        /** Upper limits for the "time spent" fields of the relapse dialog. */
-        private const val MAX_RELAPSE_HOURS = 999L
-        private const val MAX_RELAPSE_MINUTES = 59999L
 
         /**
          * All addictions, kept in a static list so that every screen can reach them. Detail screens
          * receive only a position in this list. The list is sorted by priority. If Android has
          * ended the app process this list is empty again and has to be reloaded from disk (see
-         * `loadAddictionFromIntent()` in Utils.kt).
+         * `loadAddictionFromIntent()` in Utils.kt). The list itself lives in [Trackers], which is
+         * shared with the new UI.
          */
-        val addictions = ArrayList<Addiction>()
+        val addictions: ArrayList<Addiction> get() = Trackers.addictions
     }
 
     private lateinit var adapterAddictions: AddictionCardAdapter
@@ -118,6 +121,8 @@ class Main : AppCompatActivity() {
                 // If the start lies in the future the status is Future; the timer (see `tick`)
                 // switches it to Ongoing at the right moment.
                 val addiction = Addiction.newInstance(name, instant, priority)
+                // Sobriety Neo: default milestones (can be turned off in the settings).
+                DefaultMilestones.applyIfEnabled(this, addiction)
                 addictions.add(addiction)
                 addictions.sortWith { a1, a2 -> a1.priority.compareTo(a2.priority) }
                 cacheHandler.write()
@@ -129,6 +134,7 @@ class Main : AppCompatActivity() {
     private val goToSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             if (it.data?.getBooleanExtra("import", false) == true) {
+                Trackers.migrate(this, addictions)
                 addictions.sortWith { a1, a2 -> a1.priority.compareTo(a2.priority) }
                 cacheHandler.write()
             }
@@ -162,14 +168,8 @@ class Main : AppCompatActivity() {
         // Load the saved data (only the first time; the list survives screen rotations).
         // loadFromDisk() never throws: a damaged file is kept aside and the app still starts.
         createdAt = SystemClock.elapsedRealtime()
-        if (addictions.isEmpty()) {
-            addictions.addAll(cacheHandler.loadFromDisk())
-            DiagnosticsLog.event(
-                "data_load",
-                "ms" to (SystemClock.elapsedRealtime() - createdAt),
-                "trackers" to addictions.size
-            )
-        }
+        // Loads the data (only the first time) and updates old data to the current format.
+        if (Trackers.ensureLoaded(this)) cacheHandler.write()
         // A waiting addiction may have reached its start time while the app was closed.
         if (activateDueAddictions()) cacheHandler.write()
 
@@ -291,6 +291,13 @@ class Main : AppCompatActivity() {
                 )
                 dialog.dismiss()
             }
+            dialogViewBinding.displayOptions.setOnClickListener {
+                dialog.dismiss()
+                showDisplayOptionsDialog(a) {
+                    cacheHandler.write()
+                    adapterAddictions.notifyItemChanged(addictions.indexOf(a))
+                }
+            }
             dialogViewBinding.milestones.setOnClickListener {
                 startActivity(
                     Intent(this@Main, Milestones::class.java)
@@ -336,81 +343,12 @@ class Main : AppCompatActivity() {
         return changed
     }
 
-    /**
-     * Bottom sheet for logging a relapse, with optional fields for the money and time spent.
-     * Empty fields count as 0. The costs are stored with the relapse and subtracted from the
-     * savings (see SavingsCalculator.kt).
-     */
-    private fun showRelapseDialog(addiction: Addiction) {
-        val sheet = DialogRelapseBinding.inflate(layoutInflater)
-        val dialog = BottomSheetDialog(this)
-        dialog.setContentView(sheet.root)
-        sheet.relapseQuestion.text = getString(R.string.relapse_confirm, addiction.name)
-        sheet.btnInfo.setInfoClick(R.string.relapse, R.string.info_relapse)
-        // Show the currency of the money savings in the hint, e.g. "Money spent (€)".
-        val currency = addiction.primaryCurrency
-        if (currency.isNotEmpty())
-            sheet.moneyInputLayout.hint = getString(R.string.relapse_money_spent_with_currency, currency)
-        sheet.btnCancel.setOnClickListener { dialog.dismiss() }
-        sheet.btnLogRelapse.setOnClickListener {
-            val moneyText = sheet.moneyInput.text.toString()
-            val money = if (moneyText.isBlank()) 0.0 else moneyText.toDoubleLenient()
-            val hours = sheet.hoursInput.text.toString().trim().let { t -> if (t.isEmpty()) 0L else t.toLongOrNull() }
-            val minutes = sheet.minutesInput.text.toString().trim().let { t -> if (t.isEmpty()) 0L else t.toLongOrNull() }
-            // Check the inputs; nothing is saved while one of them is invalid.
-            sheet.moneyInputLayout.error =
-                if (money == null || money < 0) getString(R.string.error_invalid_amount) else null
-            sheet.hoursInputLayout.error =
-                if (hours == null || hours !in 0..MAX_RELAPSE_HOURS) getString(R.string.error_amount_too_large, MAX_RELAPSE_HOURS) else null
-            sheet.minutesInputLayout.error =
-                if (minutes == null || minutes !in 0..MAX_RELAPSE_MINUTES) getString(R.string.error_amount_too_large, MAX_RELAPSE_MINUTES) else null
-            if (money == null || money < 0 || hours == null || hours !in 0..MAX_RELAPSE_HOURS ||
-                minutes == null || minutes !in 0..MAX_RELAPSE_MINUTES) return@setOnClickListener
+    /** Relapse bottom sheet (shared with the new UI, see utils/TrackerDialogs.kt). */
+    private fun showRelapseDialog(addiction: Addiction) =
+        showRelapseSheet(addiction) { adapterAddictions.notifyItemChanged(addictions.indexOf(addiction)) }
 
-            addiction.relapse(RelapseCost(System.currentTimeMillis(), money, hours * 60 + minutes))
-            DiagnosticsLog.event("relapse_logged", "with_costs" to (money > 0 || hours > 0 || minutes > 0))
-            adapterAddictions.notifyItemChanged(addictions.indexOf(addiction))
-            cacheHandler.write()
-            dialog.dismiss()
-            showAddNoteAfterRelapseDialogIfEnabled(addiction)
-        }
-        dialog.show()
-    }
-
-    /**
-     * Asks the user whether to write a note about the relapse (can be turned off in the
-     * settings or with the "don't show again" checkbox). The note is saved for today's date.
-     */
-    private fun showAddNoteAfterRelapseDialogIfEnabled(addiction: Addiction) {
-        val pref = getSharedPref()
-        if (pref.getAddNoteAfterRelapsePref()) {
-            var dialog: Dialog? = null
-            val dialogViewBinding = DialogAddNoteAfterRelapseBinding.inflate(layoutInflater)
-            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-            with(dialogViewBinding) {
-                noteInput.setText(addiction.dailyNotes[today]) //TextView.setText does accept a null CharSequence.
-                btnSave.setOnClickListener { _ ->
-                    if (noteInput.isInputEmpty()) {
-                        noteInputLayout.error = getString(R.string.error_empty_note)
-                    } else {
-                        addiction.dailyNotes[today] = noteInput.text.toString()
-                        cacheHandler.write()
-                        requireNotNull(dialog).dismiss()
-                    }
-                }
-            }
-            with(BottomSheetDialog(this)) {
-                dialog = this
-                setContentView(dialogViewBinding.root)
-                setOnDismissListener {
-                    if (dialogViewBinding.dontShowAgain.isChecked) {
-                        pref.edit { putBoolean("add_note_after_relapse", false) }
-                    }
-                }
-                show()
-            }
-        }
-    }
+    private fun showAddNoteAfterRelapseDialogIfEnabled(addiction: Addiction) =
+        showNoteAfterRelapseIfEnabled(addiction)
 
     /** Shows the "add your first addiction" hint only while the list is empty. */
     private fun updatePromptVisibility() {
@@ -462,6 +400,10 @@ class Main : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (handleInfoMenuItem(id, R.string.app_name, R.string.info_main)) return true
+        if (id == R.id.statistics) {
+            startActivity(Intent(this, Statistics::class.java))
+            return true
+        }
         if (id == R.id.go_to_settings) {
             val intent = Intent(this, Settings::class.java)
             goToSettings.launch(intent)

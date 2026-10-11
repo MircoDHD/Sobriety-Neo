@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Savings screen of one addiction.
-  Top: the calculated totals (Sobriety Neo). Below: the time saved per day and the list of other
-  savings (money, cigarettes, ...), as in the original app.
+  Top: the calculated totals (Sobriety Neo). Below: the list of savings (money, time, other).
+  The separate "time saved per day" card of the original app is now the category "Time".
   The whole screen scrolls; the list inside does not scroll on its own (nestedScrollingEnabled).
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -44,7 +44,7 @@
                 tools:text="Money: 123.40 € (this month 45.10 €)" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Time saved per day -->
+        <!-- Savings list -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -55,73 +55,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                android:text="@string/time"
-                android:gravity="center_vertical"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/btn_edit_time"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@drawable/ripple"
-                android:src="@drawable/edit_note_24px"
-                android:contentDescription="@string/edit"
-                android:tooltipText="@string/edit" />
-
-            <ImageView
-                android:id="@+id/btn_expand_collapse_time"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@drawable/ripple"
-                android:src="@drawable/expand_less_24px"
-                android:contentDescription="@string/collapse"
-                android:tooltipText="@string/collapse" />
-        </LinearLayout>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/time_saved_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            app:contentPadding="6dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/time_saved_per_day"/>
-
-                <TextView
-                    android:id="@+id/time_saved"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:gravity="center"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Other savings -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:text="@string/other_savings"
+                android:text="@string/savings_list"
                 android:gravity="center_vertical"
                 android:textSize="18sp"
                 android:textStyle="bold" />

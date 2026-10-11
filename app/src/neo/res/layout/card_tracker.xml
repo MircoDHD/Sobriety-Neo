@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One tracker card of the new UI (see TrackerCardAdapter.kt in src/neo).
+
+  Left: a ring that fills up towards the next milestone, with the number of days inside.
+  Right: name, priority, the counter / countdown text and the savings.
+  Bottom: buttons (each one can be hidden per tracker in its display options, except
+  "Relapse") and the relapse button.
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/cardColor"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="2dp"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="84dp"
+                android:layout_height="84dp">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/ring"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:max="1000"
+                    app:indicatorSize="84dp"
+                    app:trackThickness="7dp"
+                    app:trackCornerRadius="4dp"
+                    tools:progress="600" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/ring_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/colorTextOnCard"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        tools:text="45" />
+
+                    <TextView
+                        android:id="@+id/ring_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/colorTextOnCard"
+                        android:textSize="11sp"
+                        tools:text="days" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/colorTextOnCard"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="Smoking" />
+
+                <TextView
+                    android:id="@+id/priority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingVertical="2dp"
+                    android:textSize="12sp"
+                    tools:text="● High" />
+
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorTextOnCard"
+                    android:textSize="14sp"
+                    tools:text="1 month 2 weeks 3 days" />
+
+                <TextView
+                    android:id="@+id/savings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorTextOnCard"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    tools:text="💰 123.40 € saved · 45.10 € this month" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <HorizontalScrollView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/button_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btn_options"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/display_options"
+                        android:tooltipText="@string/display_options"
+                        android:src="@drawable/tune_24px" />
+
+                    <ImageView
+                        android:id="@+id/btn_timeline"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/timeline"
+                        android:tooltipText="@string/timeline"
+                        android:src="@drawable/view_timeline_24" />
+
+                    <ImageView
+                        android:id="@+id/btn_notes"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/daily_notes"
+                        android:tooltipText="@string/daily_notes"
+                        android:src="@drawable/edit_note_24px" />
+
+                    <ImageView
+                        android:id="@+id/btn_savings"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/savings"
+                        android:tooltipText="@string/savings"
+                        android:src="@drawable/credit_card" />
+
+                    <ImageView
+                        android:id="@+id/btn_milestones"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/milestones"
+                        android:tooltipText="@string/milestones"
+                        android:src="@drawable/emoji_flags" />
+
+                    <ImageView
+                        android:id="@+id/btn_stop"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/stop"
+                        android:tooltipText="@string/stop"
+                        android:src="@drawable/ic_baseline_stop_24" />
+
+                    <ImageView
+                        android:id="@+id/btn_delete"
+                        style="@style/NeoCardIcon"
+                        android:contentDescription="@string/delete"
+                        android:tooltipText="@string/delete"
+                        android:src="@drawable/ic_baseline_delete_24" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_relapse"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/relapse"
+                app:cornerRadius="18dp"
+                app:icon="@drawable/ic_reset" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

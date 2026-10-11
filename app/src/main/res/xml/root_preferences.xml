@@ -19,6 +19,45 @@
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
 
+        <!-- Sobriety Neo, new UI only (removed in the classic variant, see Settings.kt) -->
+        <SwitchPreferenceCompat
+            app:key="amoled_black"
+            app:title="@string/amoled_black"
+            app:summary="@string/amoled_black_summary"
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+    <!-- Sobriety Neo, new UI only: tabs and order of the cards -->
+    <PreferenceCategory
+        app:key="category_layout"
+        app:title="@string/layout"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="manage_tabs"
+            app:persistent="false"
+            app:title="@string/manage_tabs"
+            app:summary="@string/manage_tabs_summary"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            app:key="show_all_tab"
+            app:title="@string/show_all_tab"
+            app:summary="@string/show_all_tab_summary"
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"/>
+
+        <ListPreference
+            app:key="card_sort"
+            app:title="@string/card_sort"
+            app:entries="@array/card_sort_entries"
+            app:entryValues="@array/card_sort_values"
+            app:defaultValue="priority"
+            app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/general"
@@ -91,6 +130,28 @@
             app:title="@string/hide_completed_milestones"
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
+
+        <!-- Sobriety Neo: default milestones for new entries (opt-out), see DefaultMilestones.kt -->
+        <SwitchPreferenceCompat
+            app:key="default_milestones_enabled"
+            app:title="@string/default_milestones"
+            app:summary="@string/default_milestones_summary"
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:key="edit_default_milestones"
+            app:persistent="false"
+            app:title="@string/edit_default_milestones"
+            app:dependency="default_milestones_enabled"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="apply_default_milestones"
+            app:persistent="false"
+            app:title="@string/apply_default_milestones"
+            app:summary="@string/apply_default_milestones_summary"
+            app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
 

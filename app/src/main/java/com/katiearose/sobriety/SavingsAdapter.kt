@@ -56,7 +56,13 @@ class SavingsAdapter(private val addiction: Addiction, private val context: Cont
         val period = meta?.period ?: RatePeriod.DAY
         val amount = meta?.enteredAmount ?: pair.second.first
         val periodText = context.resources.getStringArray(R.array.rate_periods)[period.ordinal]
-        val categoryText = context.resources.getStringArray(R.array.saving_categories)[(meta?.category ?: SavingCategory.CUSTOM).ordinal]
+        // R.array.saving_categories is ordered Money, Time, Other.
+        val categoryIndex = when (meta?.category ?: SavingCategory.CUSTOM) {
+            SavingCategory.MONEY -> 0
+            SavingCategory.TIME -> 1
+            SavingCategory.CUSTOM -> 2
+        }
+        val categoryText = context.resources.getStringArray(R.array.saving_categories)[categoryIndex]
         holder.savingsAmountPerDay.text = context.getString(
             R.string.saving_rate_line, formatAmount(amount, pair.second.second), periodText, categoryText
         )

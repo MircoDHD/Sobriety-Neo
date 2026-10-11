@@ -3,6 +3,7 @@ package com.katiearose.sobriety.utils
 import android.content.Context
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.core.text.HtmlCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.katiearose.sobriety.R
 
@@ -25,6 +26,19 @@ fun Context.showInfo(@StringRes title: Int, @StringRes text: Int) {
         .setTitle(title)
         .setIcon(R.drawable.info_24px)
         .setMessage(text)
+        .setPositiveButton(android.R.string.ok, null)
+        .show()
+}
+
+/**
+ * Like [showInfo], but the text is simple HTML (<b>, <br>, <ul>), for longer formatted
+ * explanations such as the one of the settings screen. The string must be wrapped in CDATA.
+ */
+fun Context.showInfoHtml(@StringRes title: Int, @StringRes htmlText: Int) {
+    MaterialAlertDialogBuilder(this)
+        .setTitle(title)
+        .setIcon(R.drawable.info_24px)
+        .setMessage(HtmlCompat.fromHtml(getString(htmlText), HtmlCompat.FROM_HTML_MODE_LEGACY))
         .setPositiveButton(android.R.string.ok, null)
         .show()
 }

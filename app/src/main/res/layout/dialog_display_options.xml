@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bottom sheet "Display options" of one tracker (Sobriety Neo, both UI variants).
+  The new UI adds more options (visible buttons, tabs) into extra_options at runtime.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/options_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/display_options"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/btn_info"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@drawable/ripple"
+                android:src="@drawable/info_24px"
+                android:contentDescription="@string/info"
+                android:tooltipText="@string/info" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="?attr/textInputOutlinedExposedDropdownMenuStyle"
+            android:id="@+id/mode_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:hint="@string/display_mode">
+            <AutoCompleteTextView
+                android:id="@+id/mode_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                app:simpleItems="@array/counter_modes" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="?attr/textInputOutlinedExposedDropdownMenuStyle"
+            android:id="@+id/max_units_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="@string/display_max_units">
+            <AutoCompleteTextView
+                android:id="@+id/max_units_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                app:simpleItems="@array/max_units" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="?attr/textInputOutlinedExposedDropdownMenuStyle"
+            android:id="@+id/smallest_unit_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="@string/display_smallest_unit">
+            <AutoCompleteTextView
+                android:id="@+id/smallest_unit_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                app:simpleItems="@array/time_unit_levels" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:textStyle="italic"
+            tools:text="Preview: 3 days 4 hours" />
+
+        <!-- Filled at runtime by the new UI (visible buttons, tabs). -->
+        <LinearLayout
+            android:id="@+id/extra_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:text="@string/save" />
+    </LinearLayout>
+</ScrollView>

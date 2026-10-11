@@ -20,6 +20,11 @@
         android:roundIcon="@mipmap/sobriety_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sobriety">
+        <!-- Sobriety Neo: statistics with charts (both UI variants) -->
+        <activity
+            android:name=".activities.Statistics"
+            android:exported="false"
+            android:label="@string/statistics" />
         <activity
             android:name=".activities.Milestones"
             android:exported="false"

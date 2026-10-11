@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Extra screens of the new UI (flavor "neo"); merged into src/main/AndroidManifest.xml. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".activities.Tabs"
+            android:exported="false"
+            android:label="@string/manage_tabs" />
+    </application>
+</manifest>

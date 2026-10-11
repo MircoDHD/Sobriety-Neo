@@ -17,6 +17,11 @@ import com.katiearose.sobriety.shared.CacheHandler
 import com.katiearose.sobriety.utils.MAX_AVERAGE_ATTEMPTS_WINDOW
 import com.katiearose.sobriety.utils.applyThemes
 import com.katiearose.sobriety.utils.DiagnosticsLog
+import com.katiearose.sobriety.utils.DefaultMilestones
+import com.katiearose.sobriety.utils.Trackers
+import com.katiearose.sobriety.utils.milestoneText
+import com.katiearose.sobriety.utils.showInfoHtml
+import com.katiearose.sobriety.databinding.DialogAddMilestoneBinding
 import com.katiearose.sobriety.utils.handleInfoMenuItem
 import com.katiearose.sobriety.utils.showInfo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -50,7 +55,11 @@ class Settings : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
-        handleInfoMenuItem(item.itemId, R.string.settings, R.string.info_settings) || super.onOptionsItemSelected(item)
+        if (item.itemId == R.id.info) {
+            // The settings explanation is formatted (bold names), so it is HTML.
+            showInfoHtml(R.string.settings, R.string.info_settings_html)
+            true
+        } else super.onOptionsItemSelected(item)
 
     class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -134,6 +143,8 @@ class Settings : AppCompatActivity() {
             }
 
             setUpDiagnostics()
+            setUpDefaultMilestones()
+            setUpNewUiPreferences()
 
             findPreference<Preference>("pref_app_version")?.summary = BuildConfig.VERSION_NAME
 
@@ -143,6 +154,118 @@ class Settings : AppCompatActivity() {
                 startActivity(i)
                 true
             }
+        }
+
+        /**
+         * Sobriety Neo: settings that only exist in the new UI (true black theme, tabs, order of
+         * the cards). They are removed in the classic variant.
+         */
+        private fun setUpNewUiPreferences() {
+            val amoled = findPreference<SwitchPreferenceCompat>("amoled_black")
+            if (!BuildConfig.NEW_UI) {
+                amoled?.let { it.parent?.removePreference(it) }
+                findPreference<PreferenceCategory>("category_layout")?.let { preferenceScreen.removePreference(it) }
+                return
+            }
+            amoled?.setOnPreferenceChangeListener { _, _ ->
+                requireActivity().recreate()
+                true
+            }
+            findPreference<Preference>("manage_tabs")?.setOnPreferenceClickListener {
+                // The tabs screen only exists in the new UI, so it is opened by its name.
+                startActivity(Intent().setClassName(requireContext(), "com.katiearose.sobriety.activities.Tabs"))
+                true
+            }
+        }
+
+        /**
+         * Sobriety Neo: default milestones for new entries (see [DefaultMilestones]).
+         *  - "Edit default milestones": uncheck to remove, "Add" for a new one, "Reset" for the
+         *    standard list (1 day ... 5 years).
+         *  - "Add to existing entries": adds the list to every entry that does not have them yet.
+         */
+        private fun setUpDefaultMilestones() {
+            val editPref = findPreference<Preference>("edit_default_milestones")
+            fun updateSummary() {
+                editPref?.summary = DefaultMilestones.get(requireContext())
+                    .joinToString(", ") { requireContext().milestoneText(it) }
+            }
+            updateSummary()
+            editPref?.setOnPreferenceClickListener {
+                showEditDefaultMilestonesDialog { updateSummary() }
+                true
+            }
+            findPreference<Preference>("apply_default_milestones")?.setOnPreferenceClickListener {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.apply_default_milestones)
+                    .setMessage(R.string.apply_default_milestones_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        Trackers.ensureLoaded(requireContext())
+                        val list = DefaultMilestones.get(requireContext())
+                        var changed = 0
+                        Main.addictions.forEach { if (DefaultMilestones.addTo(it, list)) changed++ }
+                        if (changed > 0) cacheHandler.writeCache(Main.addictions)
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.apply_default_milestones_done, changed),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .show()
+                true
+            }
+        }
+
+        private fun showEditDefaultMilestonesDialog(onChanged: () -> Unit) {
+            val context = requireContext()
+            val list = DefaultMilestones.get(context)
+            val checked = BooleanArray(list.size) { true }
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.edit_default_milestones)
+                .setMultiChoiceItems(list.map { context.milestoneText(it) }.toTypedArray(), checked) { _, which, isChecked ->
+                    checked[which] = isChecked
+                }
+                .setPositiveButton(R.string.save) { _, _ ->
+                    DefaultMilestones.set(context, list.filterIndexed { i, _ -> checked[i] })
+                    onChanged()
+                }
+                .setNeutralButton(R.string.add) { _, _ ->
+                    // Keep the current choice, then ask for the new milestone.
+                    DefaultMilestones.set(context, list.filterIndexed { i, _ -> checked[i] })
+                    showAddDefaultMilestoneDialog(onChanged)
+                }
+                .setNegativeButton(R.string.reset_to_standard) { _, _ ->
+                    DefaultMilestones.reset(context)
+                    onChanged()
+                }
+                .show()
+        }
+
+        private fun showAddDefaultMilestoneDialog(onChanged: () -> Unit) {
+            val context = requireContext()
+            val view = DialogAddMilestoneBinding.inflate(layoutInflater)
+            var unitIndex = 1 // days
+            view.unitInput.setText(resources.getStringArray(R.array.time_units)[unitIndex], false)
+            view.unitInput.setOnItemClickListener { _, _, position, _ -> unitIndex = position }
+            val dialog = MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.add)
+                .setView(view.root)
+                .create()
+            view.btnSaveMilestone.setOnClickListener {
+                val number = view.milestoneNumberInput.text.toString().toIntOrNull()
+                if (number == null || number <= 0 || number > 9999) {
+                    view.milestoneNumberInputLayout.error = getString(R.string.error_amount_too_large, 9999)
+                    return@setOnClickListener
+                }
+                DefaultMilestones.set(
+                    context,
+                    DefaultMilestones.get(context) + (number to DefaultMilestones.UNITS[unitIndex].second)
+                )
+                onChanged()
+                dialog.dismiss()
+            }
+            dialog.show()
         }
 
         /**

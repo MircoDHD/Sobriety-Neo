@@ -191,15 +191,139 @@
     <string name="diagnostics_export_failed">Could not export the diagnostics</string>
 
     <!-- ===== Sobriety Neo: explanations behind the "i" buttons ===== -->
-    <string name="info_main">Each card is one thing you want to stay away from.\n\n• The counter shows how long it has been since your last relapse. It is calculated from the saved time, so nothing runs in the background.\n• Tap the card for a detailed summary with progress bars.\n• Tap the priority to change it. Cards are sorted by priority.\n• ↺ logs a relapse (or starts tracking again).\n• ■ stops tracking. The time stays saved.\n• Timeline shows all attempts.\n• … opens daily notes, savings and milestones.\n• 🗑 deletes the entry for good.\n\nIf you set up savings, the money and time you saved appear on the card.</string>
+    <string name="info_main">Each card is one thing you want to stay away from.\n\n• The counter shows how long it has been since your last relapse. It is calculated from the saved time, so nothing runs in the background.\n• Tap the card for a detailed summary with progress bars.\n• Tap the priority to change it. Cards are sorted by priority.\n• ↺ logs a relapse (or starts tracking again).\n• ■ stops tracking. The time stays saved.\n• Timeline shows all attempts.\n• … opens daily notes, savings, display options and milestones.\n• 🗑 deletes the entry for good.\n\nDisplay options: choose whether the card shows the counter, a countdown to the next milestone, or both, and how exact the time is shown.\n\nThe chart button at the top opens your statistics.</string>
     <string name="info_relapse">Logging a relapse ends the current attempt and starts a new one right now. Your history is kept in the timeline.\n\nMoney and time spent are optional. If you enter them, they are subtracted from your savings, so the totals stay honest. Leave the fields empty if you do not want to track this.</string>
-    <string name="info_add_saving">Enter what you save by not doing it.\n\n• Money: the amount and its currency. All money savings are added up and shown on the main screen, for this month and in total.\n• Other: anything you can count, for example cigarettes or drinks.\n\n\"Per\" tells the app whether the amount is per day, per week or per month. The app converts it to a daily value and multiplies it by the time you stayed clean.</string>
-    <string name="info_savings">Here you see what staying clean has given you so far.\n\nThe totals are calculated like this: amount per day × the time you stayed clean, in all attempts together. Money and time you entered when logging a relapse are subtracted.\n\n\"This month\" only counts the current calendar month.\n\n• Time: how much time per day you used to spend on it.\n• Other savings: money and everything else, with a category and a period.</string>
+    <string name="info_add_saving">Enter what you save by not doing it.\n\n• Money: the amount and its currency. All money savings are added up and shown on the main screen, for this month and in total.\n• Time: hours you used to spend on it (1.5 = one and a half hours).\n• Other: anything you can count, for example cigarettes or drinks.\n\n\"Per\" tells the app whether the amount is per day, per week or per month. The app converts it to a daily value and multiplies it by the time you stayed clean.\n\nThe name is optional for money and time. Without a name the category is used, e.g. \"Money\".</string>
+    <string name="info_savings">Here you see what staying clean has given you so far.\n\nThe totals are calculated like this: amount per day × the time you stayed clean, in all attempts together. Money and time you entered when logging a relapse are subtracted.\n\n\"This month\" only counts the current calendar month.\n\nEvery saving has a category: money, time or other. Tap + to add one, the pencil to change it.</string>
     <string name="info_timeline">The timeline lists every attempt: when it started, when it ended and how long it lasted.\n\nThe hourglass button calculates the average length of the attempts you choose.</string>
     <string name="info_milestones">Milestones are goals such as \"7 days\" or \"3 months\". The bar shows how close you are, and the date shows when you will reach it.\n\nMonths and years follow the calendar, exactly like the counter.</string>
     <string name="info_daily_notes">Write down how a day went, what helped or what was difficult. There is one note per day.\n\nIf enabled in the settings, the app offers to write a note after a relapse.</string>
     <string name="info_summary">The summary shows your current attempt with a progress bar for each unit of time.\n\nEach bar shows how far you are into the next unit, for example how much of the current day or month has passed.</string>
     <string name="info_create">Give the entry a name and choose when you stopped. You can choose a date in the past, or in the future if you want to start later.\n\nThe priority decides the order of the cards on the main screen.</string>
-    <string name="info_settings">• Appearance: theme and Material You colors.\n• General: date format, the note after a relapse, and how many past attempts are used for the average.\n• Data: export everything to a file or import a file, for example from the original Sobriety app.\n• Diagnostics: an optional, anonymous log that helps to find problems.</string>
     <string name="info_diagnostics">When turned on, the app records anonymous technical data on this device:\n\n• how long the app and each screen take to start\n• how long loading and saving takes, and how many entries there are\n• whether the counter updates run smoothly\n• crashes (error type and code location only)\n\nNever recorded: names of your entries, notes, amounts, dates of relapses, or anything that identifies you or your phone.\n\nThe log stays on your phone (max. 256 KB). It only leaves the phone if you export it and send it to someone yourself.</string>
+    <!-- ===== Sobriety Neo 11: savings, display options, statistics, default milestones ===== -->
+    <string name="saving_category_time">Time</string>
+    <string name="saving_hours_hint">Hours</string>
+    <string name="saving_name_optional">Name (optional)</string>
+    <string name="savings_list">Savings</string>
+    <string name="add">Add</string>
+    <string name="reset_to_standard">Reset</string>
+    <string name="unit_minute">Minutes</string>
+    <string name="unit_second">Seconds</string>
+    <plurals name="years_plain"><item quantity="one">%d year</item><item quantity="other">%d years</item></plurals>
+    <plurals name="months_plain"><item quantity="one">%d month</item><item quantity="other">%d months</item></plurals>
+    <plurals name="weeks_plain"><item quantity="one">%d week</item><item quantity="other">%d weeks</item></plurals>
+    <plurals name="days_plain"><item quantity="one">%d day</item><item quantity="other">%d days</item></plurals>
+    <plurals name="hours_plain"><item quantity="one">%d hour</item><item quantity="other">%d hours</item></plurals>
+    <plurals name="minutes_plain"><item quantity="one">%d minute</item><item quantity="other">%d minutes</item></plurals>
+    <plurals name="seconds_plain"><item quantity="one">%d second</item><item quantity="other">%d seconds</item></plurals>
+    <!-- Label below the number in the ring of a card: "1 day" / "45 days" -->
+    <plurals name="days_label"><item quantity="one">day</item><item quantity="other">days</item></plurals>
+    <string name="less_than">less than %s</string>
+    <string name="next_milestone_countdown">Next milestone (%1$s) in %2$s</string>
+
+    <string name="display_options">Display options</string>
+    <string name="display_options_for">Display options: %s</string>
+    <string name="display_mode">Shown on the card</string>
+    <string name="mode_counter">Counter (time since the last relapse)</string>
+    <string name="mode_milestone">Countdown to the next milestone</string>
+    <string name="mode_both">Both</string>
+    <string name="display_max_units">Number of units shown</string>
+    <string name="max_units_all">All</string>
+    <string name="display_smallest_unit">Smallest unit shown</string>
+    <string name="display_preview">Preview: %s</string>
+    <string name="info_display_options">These options only change how the time is shown. The time is always tracked to the second.\n\n• Shown on the card: the counter since your last relapse, a countdown to your next milestone, or both. Without milestones left the counter is shown.\n• Number of units: how many units are shown, starting with the largest one you have reached. \"1\" shows only \"2 years\", or \"5 hours\" on the first day.\n• Smallest unit: hides everything below, e.g. \"Minutes\" hides the seconds.\n\nExample: number of units 2 and smallest unit minutes shows \"5 hours 30 minutes\" on the first day and \"3 days 4 hours\" later.</string>
+    <string name="visible_buttons">Buttons on the card</string>
+    <string name="tabs_for_tracker">Show in these tabs</string>
+
+    <string name="statistics">Statistics</string>
+    <string name="statistics_empty">Add an entry to see statistics.</string>
+    <string name="statistics_overview">Overview</string>
+    <string name="statistics_overview_numbers">Entries: %1$d\nRelapses in total: %2$d\nRelapses in the last 30 days: %3$d</string>
+    <string name="statistics_relapses_per_month">Relapses per month</string>
+    <string name="statistics_tracker_numbers">Current streak: %1$s\nLongest streak: %2$s\nAverage attempt: %3$s\nRelapses: %4$d (last 30 days: %5$d)\nClean in total: %6$s</string>
+    <string name="statistics_attempt_lengths">Length of the last attempts (days)</string>
+    <string name="info_statistics">• Overview: how many relapses happened in each of the last 12 months, for all entries together.\n• Per entry: your current and longest streak, the average length of finished attempts, the number of relapses and the time you stayed clean in total.\n• The chart shows the length of the last attempts in days, the newest on the right.\n\nEverything is calculated on your phone from the times you saved.</string>
+
+    <string name="default_milestones">Default milestones</string>
+    <string name="default_milestones_summary">New entries get a set of milestones. You can remove them from an entry at any time.</string>
+    <string name="edit_default_milestones">Edit default milestones</string>
+    <string name="apply_default_milestones">Add to existing entries</string>
+    <string name="apply_default_milestones_summary">Adds the default milestones to all entries that do not have them yet</string>
+    <string name="apply_default_milestones_confirm">Add the default milestones to all existing entries? Milestones they already have are kept.</string>
+    <string name="apply_default_milestones_done">Updated %d entries</string>
+
+    <!-- ===== Sobriety Neo 11: new UI ===== -->
+    <string name="amoled_black">True black (AMOLED)</string>
+    <string name="amoled_black_summary">Pure black backgrounds in dark mode. Saves battery on OLED screens.</string>
+    <string name="layout">Layout</string>
+    <string name="manage_tabs">Manage tabs</string>
+    <string name="manage_tabs_summary">Add, rename, sort and fill the tabs of the main screen</string>
+    <string name="show_all_tab">Show \"All\" tab</string>
+    <string name="show_all_tab_summary">The first tab shows every entry</string>
+    <string name="card_sort">Sort cards by</string>
+    <string name="sort_priority">Priority</string>
+    <string name="sort_streak_desc">Longest streak first</string>
+    <string name="sort_streak_asc">Shortest streak first</string>
+    <string name="sort_name">Name</string>
+    <string name="prompt_neo">Tap \"Add\" to start tracking something you want to stay away from.</string>
+    <string name="add_tracker">Add</string>
+    <string name="tab_all">All</string>
+    <string name="tab_default_high">High priority</string>
+    <string name="tab_empty">No entries in this tab yet.\nTap the ⚙ button on a card (or hold the card) to add it, or change the tab in \"Manage tabs\".</string>
+    <string name="priority_dot">● %s</string>
+    <string name="tabs_empty">No tabs yet. Tap \"Add tab\".</string>
+    <string name="add_tab">Add tab</string>
+    <string name="edit_tab">Edit tab</string>
+    <string name="tab_name">Tab name</string>
+    <string name="tab_rule">Fill automatically</string>
+    <string name="tab_members">Add by hand</string>
+    <string name="tab_description">%1$s · %2$d added by hand</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
+    <string name="delete_tab_confirm">Delete the tab \"%s\"? The entries in it are not deleted.</string>
+    <string name="rule_none">Only by hand</string>
+    <string name="rule_high">Automatic: high priority</string>
+    <string name="rule_medium">Automatic: medium priority</string>
+    <string name="rule_low">Automatic: low priority</string>
+    <string name="rule_ongoing">Automatic: running</string>
+    <string name="rule_stopped">Automatic: stopped</string>
+    <string name="info_main_neo">Each card is one thing you want to stay away from.\n\n• The ring fills up towards your next milestone. The number inside is the number of full days.\n• Below the name you see the counter (or a countdown to your next milestone) and what you have saved.\n• Tap the card for a detailed summary. Tap the priority to change it.\n• Relapse logs a relapse; optionally with money and time spent.\n• ⚙ (or holding the card) opens the display options: counter or countdown, how exact the time is shown, which buttons are visible and in which tabs the entry appears.\n• The other buttons open the timeline, daily notes, savings and milestones, stop tracking, or delete the entry.\n\nSwipe left and right to switch tabs. Tabs can be filled automatically (for example by priority) or by hand; see \"Manage tabs\" in the menu.\n\nThe chart button opens your statistics. Nothing runs in the background: the time is calculated from the saved timestamps.</string>
+    <string name="info_tabs">Tabs group your entries on the main screen. Swipe left and right to switch between them.\n\n• Fill automatically: the tab shows every entry that matches, for example all entries with high priority. New entries appear by themselves.\n• Add by hand: tick the entries that should always be in this tab. You can also do this from the display options of a card.\n\nBoth can be combined. Use the arrows to change the order. The \"All\" tab can be hidden in the settings.</string>
+
+    <!-- Settings explanation (HTML, shown by the "i" button on the settings screen) -->
+    <string name="info_settings_html"><![CDATA[
+<b><u>Appearance</u></b><br>
+<b>Theme:</b> light, dark, or follow the system setting.<br>
+<b>Material You:</b> uses the colors of your wallpaper (Android 12 and newer).<br>
+<b>True black (AMOLED):</b> pure black backgrounds in dark mode (new look only). Saves battery on OLED screens.<br><br>
+<b><u>Layout</u></b> (new look only)<br>
+<b>Manage tabs:</b> add, rename, sort and delete the tabs of the main screen, and choose how they are filled.<br>
+<b>Show “All” tab:</b> the first tab with every entry. Turn it off if you only want your own tabs.<br>
+<b>Sort cards by:</b> order of the cards inside a tab: priority, longest or shortest streak, or name.<br><br>
+<b><u>General</u></b><br>
+<b>Date format:</b> how dates are written everywhere in the app.<br>
+<b>Add note after relapse:</b> after logging a relapse (or stopping), the app offers to write a note for today.<br>
+<b>Number of Relapses:</b> how many of the last finished attempts are used for the “Recent average” on the cards. 0 hides the average.<br><br>
+<b><u>Timeline</u></b><br>
+<b>Use alternative timeline view:</b> shows the attempts as a vertical line with points instead of a list of cards.<br><br>
+<b><u>Daily notes</u></b><br>
+<b>Sort order:</b> oldest or newest note first.<br><br>
+<b><u>Milestones</u></b><br>
+<b>Sort order:</b> shortest or longest milestone first.<br>
+<b>Hide completed milestones:</b> milestones you have reached are no longer listed.<br>
+<b>Default milestones:</b> new entries automatically get a set of milestones (1 day, 1 week, 1, 3 and 6 months, 1, 2 and 5 years). On by default; you can remove them from an entry at any time.<br>
+<b>Edit default milestones:</b> remove milestones from the set, add your own, or reset to the standard set.<br>
+<b>Add to existing entries:</b> adds the set to all entries you already have.<br><br>
+<b><u>Diagnostics</u></b><br>
+<b>Collect diagnostic logs:</b> records anonymous technical data on this phone to find problems. Off by default.<br>
+<b>What is collected?:</b> shows exactly what is (and is not) recorded.<br>
+<b>Export diagnostic logs:</b> saves the log as a text file, for example to send it to the developer.<br>
+<b>Delete diagnostic logs:</b> removes everything recorded so far.<br><br>
+<b><u>Data</u></b><br>
+<b>Export:</b> saves all entries, notes, savings and milestones to a file. Do this regularly as a backup.<br>
+<b>Import:</b> adds the entries of an export file, for example from the original Sobriety app. Nothing is overwritten.<br><br>
+<b><u>About</u></b><br>
+<b>Version</b>, <b>Report an issue</b> (opens the issue page on GitHub) and <b>License</b>.
+]]></string>
 </resources>

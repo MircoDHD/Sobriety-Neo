@@ -1,5 +1,6 @@
 package com.katiearose.sobriety.activities
 
+import com.katiearose.sobriety.R
 import com.katiearose.sobriety.utils.handleInfoMenuItem
 import android.os.Bundle
 import android.os.Handler

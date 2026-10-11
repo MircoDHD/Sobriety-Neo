@@ -1,11 +1,11 @@
 # Sobriety Neo
 
-**A sobriety and habit-free counter for Android: private, offline and free.**
+**A recovery companion for Android: private, offline and free.**
 
 Sobriety Neo tracks how long you have stayed away from anything you want to quit. It shows the time
-since your last relapse down to the second, your average time between relapses, milestones, savings,
-daily notes and a timeline. All data stays on your device. There are no ads, no trackers, no accounts
-and no subscriptions.
+since your last relapse, a countdown to your next milestone, what you have saved in money and time,
+statistics with charts, daily notes and a timeline, organized in tabs you set up yourself.
+All data stays on your device. There are no ads, no trackers, no accounts and no subscriptions.
 
 Sobriety Neo is a community fork of **[Sobriety](https://github.com/seaglade/Sobriety)** by
 [seaglade](https://github.com/seaglade) and its contributors. The original app is a wonderful piece of work and the foundation of everything
@@ -36,8 +36,14 @@ new features step by step.
 ## Download and install
 
 1. Open the [Releases page](https://github.com/MircoDHD/Sobriety-Neo/releases) on your phone.
-2. Tap the newest entry and download the `.apk` file.
+2. Tap the newest entry and download the `.apk` file of the variant you want:
+   - **`…-neo-debug.apk` – Sobriety Neo**: the new look with tabs, progress rings and many options.
+   - **`…-classic-debug.apk` – Sobriety Neo Classic**: the look of the original app, with all the
+     new features that fit into it.
 3. Open the file. Android may ask you to allow installing apps from your browser or file manager.
+
+Both variants can be installed side by side, but each keeps its own data. To move your entries from
+one to the other, use **Settings → Data → Export / Import**.
 
 Every change to the code builds a new test version automatically. These builds are marked
 **Pre-release**: they are meant for testing and may contain bugs.
@@ -56,6 +62,25 @@ one is renamed, for example "Smoking (2)", so nothing is overwritten.
 ---
 
 ## What's new
+
+**v11.0.0 (preview): the new look**
+- **New main screen.** Cards with a progress ring that fills up towards your next milestone, the
+  number of days inside, and the money and time you saved.
+- **Tabs.** Swipe between tabs you set up yourself. A tab can be filled automatically (for example
+  "high priority" or "running") or by hand, or both. An "All" tab shows everything and can be
+  hidden. Cards can be sorted by priority, streak or name.
+- **Display options per entry.** Show the counter, a countdown to the next milestone, or both.
+  Choose how exact the time is shown (for example only years, or hours and minutes without
+  seconds); the time is still tracked exactly. In the new look you can also hide card buttons you do
+  not need (the relapse button always stays).
+- **Statistics and charts.** Current and longest streak, average attempt, relapses per month, and
+  the length of your last attempts.
+- **Default milestones.** New entries get 1 day, 1 week, 1, 3 and 6 months, and 1, 2 and 5 years.
+  The set can be changed or turned off in the settings, and removed from any entry.
+- **Savings:** time is now a category like money, and the name is optional for money and time.
+- **True black (AMOLED)** dark theme.
+- **Detailed explanation of every setting** behind the ⓘ button on the settings screen.
+- **Two variants:** Sobriety Neo (new look) and Sobriety Neo Classic (original look).
 
 **v10.2.0 (preview)**
 - **Savings that add up.** Every saving now has a category (money or other) and a period (per day,
@@ -105,6 +130,8 @@ Version `v10.1.0-neo.1` focuses on reliability. The full list with technical det
 
 **For developers**
 - Detailed comments for all Kotlin files, the build files and the manifest.
+- Two product flavors (`neo` and `classic`) that share the data model, the detail screens and all
+  logic; see [ARCHITECTURE.md](ARCHITECTURE.md).
 - Unit tests for the time calculation and the data model.
 - An architecture overview: [ARCHITECTURE.md](ARCHITECTURE.md).
 - Automatic builds: every push runs the tests and publishes an installable APK.
@@ -121,38 +148,37 @@ Everything listed under [What has been fixed](#what-has-been-fixed).
 ### Stage 2: Savings, explanations and diagnostics ✅ (preview)
 Everything listed under [What's new](#whats-new).
 
-### Stage 3: Display options and a new look
-The app will come in two variants: the **classic** look and a **new** look. Both get:
-- Per-entry display precision: choose which units are shown, for example only years, or hours and
-  minutes without seconds (the time is still tracked exactly)
-- A countdown to the next milestone, with the option to hide or show the counter
-
-The new look additionally gets:
-- Swipeable tabs that you can set up yourself, filled automatically (for example by priority) or by
-  hand, plus an "All" tab
-- Per-entry choice of which buttons are shown on a card (the relapse button always stays)
-- A fresh Material 3 design with a true black (AMOLED) theme
-- Many more settings to make it your own
+### Stage 3: Display options, statistics and a new look ✅ (preview)
+Everything listed under [v11.0.0](#whats-new). Both variants get the display options, the milestone
+countdown, statistics and default milestones; the new look adds tabs, the new cards, button choices
+and the true black theme.
 
 ### Stage 4: More features
-**Planned first**
-- Tutorials on first start, split into short topics, skippable and available again in the settings
-- Option to show the streak as total days ("45 days") or split up ("1 month 2 weeks 1 day")
-- Log a relapse at a chosen date and time, and edit or delete past entries
-- Notifications when a milestone is reached, plus achievement badges
-- Home screen widget
-- App lock with PIN or fingerprint
+
+**Planned first** (in this order)
+
+| | Feature |
+|:-:|---|
+| ![1](https://img.shields.io/badge/1-2ea44f?style=flat-square) | Log a relapse at a chosen date and time, and edit or delete past entries |
+| ![2](https://img.shields.io/badge/2-55b33c?style=flat-square) | Home screen widget |
+| ![3](https://img.shields.io/badge/3-80c22a?style=flat-square) | Show the streak in different ways, for example as total days ("45 days") |
+| ![4](https://img.shields.io/badge/4-aacf1c?style=flat-square) | Tutorials on first start, split into short topics, skippable and available again in the settings |
+| ![5](https://img.shields.io/badge/5-d4d212?style=flat-square) | Notification when a milestone is reached |
+| ![6](https://img.shields.io/badge/6-f1c40f?style=flat-square) | App lock with PIN or fingerprint |
 
 **Planned next**
+- Achievement badges
 - A "help now" screen for difficult moments: your personal reasons, breathing exercise, distraction ideas
 - Daily check-in with mood and a short note
 - Craving log: when, how strong, what triggered it
-- Statistics and charts about your progress
 
 **Ideas for later**
+- **Healthy habits that work for you.** Log healthy habits (for example jogging, meditation, a cold
+  shower) once, for all entries. For each entry you rate how well a habit helps against cravings,
+  together with your mood. Over time the app shows whether a habit was done (or skipped) before a
+  relapse and whether it helped, so you can recognize the patterns that lead up to a relapse.
 - Automatic local backups
 - Personal challenges, for example "30 days"
-- Tracking positive habits, not only things to quit
 - More translations
 
 The roadmap is a plan, not a promise. Priorities may change.

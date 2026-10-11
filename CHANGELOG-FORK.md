@@ -4,6 +4,29 @@ This file lists what differs from the upstream project
 ([seaglade/Sobriety](https://github.com/seaglade/Sobriety), last upstream commit `ad94ed6`).
 Newest entries first.
 
+## v11.0.0-neo.1-preview - new look, display options, statistics
+
+### Added
+- **Two variants (product flavors):** `neo` (new look, main app, keeps the app id) and `classic`
+  (original look, "Sobriety Neo Classic", app id suffix `.classic`).
+- **New main screen (neo):** swipeable tabs (ViewPager2) with an optional "All" tab and user tabs
+  filled by a rule (priority, running, stopped) and/or by hand; "Manage tabs" screen; sort order
+  setting; new cards with a progress ring towards the next milestone; per-tracker hidden buttons
+  (relapse always visible); true black (AMOLED) theme overlay.
+- **Display options per tracker (both):** counter / countdown to the next milestone / both;
+  maximum number of units and smallest unit shown (`DisplaySettings.kt`, `TimeFormat.kt`).
+- **Statistics screen (both):** relapses per month, streaks, averages, attempt lengths, with a small
+  built-in bar chart view (no chart library).
+- **Default milestones (both):** 1 day, 1 week, 1/3/6 months, 1/2/5 years for new trackers;
+  opt-out switch, editable list, "add to existing entries".
+- **Formatted explanation of every setting** (HTML) behind the ⓘ on the settings screen.
+
+### Changed
+- Savings: new category **Time** (hours per day/week/month); the old "time saved per day" is moved
+  into a Time saving when the data is loaded. The name is optional for money and time.
+- Relapse dialog and note-after-relapse moved to `utils/TrackerDialogs.kt` (shared by both UIs).
+- Data format: new key `display`.
+
 ## v10.2.0-neo.1-preview - savings, explanations, diagnostics
 
 ### Added

@@ -12,6 +12,29 @@ All user-visible texts are in English in `app/src/main/res/values/strings.xml`.
 
 The iOS port in the upstream project reuses `shared/`. Keep everything that does not need Android there.
 
+## Two UI variants (product flavors)
+
+The app module has two flavors (see `app/build.gradle.kts`):
+
+| Flavor | App | Own code | App id |
+|---|---|---|---|
+| `neo` | Sobriety Neo (new look, main app) | `app/src/neo` | `io.github.mircodhd.sobrietyneo` |
+| `classic` | Sobriety Neo Classic (original look) | `app/src/classic` | `...sobrietyneo.classic` |
+
+- Each flavor has its own `activities/Main.kt` (same class name, so the manifest and all other
+  screens work unchanged) and its own main-screen layouts.
+- Everything else (detail screens, settings, statistics, dialogs, data) is in `app/src/main`.
+- The list of trackers lives in `utils/Trackers.kt`; both `Main` classes expose it as
+  `Main.addictions`.
+- `BuildConfig.NEW_UI` is true for `neo`. Settings uses it to hide options that only exist in
+  the new look (tabs, sorting, true black theme).
+- New UI only: tabs are stored by `src/neo/.../utils/TabStore.kt` (JSON in the preferences),
+  cards are drawn by `src/neo/.../TrackerCardAdapter.kt`, tabs are edited in `activities/Tabs.kt`.
+
+Shared Sobriety Neo additions in the data model (shared module):
+`SavingsCalculator.kt` (savings categories and totals, relapse costs), `DisplaySettings.kt`
+(per-tracker precision, counter/countdown mode, hidden buttons), `Statistics.kt`.
+
 ## Data
 
 Everything is one `List<Addiction>` that is stored as a single JSON file `Sobriety.cache` in the private

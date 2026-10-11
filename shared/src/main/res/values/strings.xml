@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="cant_import_data">Can\'t import data</string>
+    <string name="cant_export_data">Can\'t export data</string>
+    <string name="cache_corrupt">Your saved data could not be read. A copy of the damaged file was kept.</string>
 </resources>

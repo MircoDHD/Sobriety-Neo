@@ -1,3 +1,5 @@
+// Build file of the Android app module.
+// The shared (platform independent) code lives in the :shared module.
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -7,12 +9,31 @@ android {
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.katiearose.sobriety"
+        // FORK: the original app uses "com.katiearose.sobriety". A different applicationId lets the
+        // fork be installed NEXT TO the original (no data is overwritten). Change it only before
+        // the first install: Android treats another id as another app, and its data does not move.
+        // The code package / namespace (below) deliberately stays "com.katiearose.sobriety".
+        applicationId = "io.github.mircodhd.sobrietyneo"
         minSdk = 21
         targetSdk = 33
-        versionCode = 22
-        versionName = "v10.0.0"
-        setProperty("archivesBaseName", "Sobriety $versionName")
+        // Increase versionCode with every release, otherwise Android refuses to update the app.
+        versionCode = 23
+        versionName = "v10.1.0-neo.1"
+        setProperty("archivesBaseName", "Sobriety-Neo-$versionName")
+    }
+
+    signingConfigs {
+        // FORK: one fixed key for debug builds. Builds on GitHub get a fresh random debug key on
+        // every run, and Android refuses to install an update that is signed with another key
+        // ("App not installed"). The key is public (password "android"), which is fine for personal
+        // test builds but it must NOT be used to publish the app in a store. Release builds will
+        // need their own private key kept as a GitHub secret.
+        getByName("debug") {
+            storeFile = file("fork-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
@@ -30,13 +51,14 @@ android {
             isShrinkResources = false
             proguardFiles += getDefaultProguardFile("proguard-android.txt")
             proguardFiles += file("proguard-rules.pro")
-            versionNameSuffix = "debug"
+            versionNameSuffix = "-debug"
             isJniDebuggable = false
             isRenderscriptDebuggable = false
             //signingConfig = signingConfigs.debug
         }
     }
     compileOptions {
+        // Core library desugaring lets java.time (used all over the app) work on Android 5 to 7.
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_9
         targetCompatibility = JavaVersion.VERSION_1_9
@@ -45,16 +67,20 @@ android {
         jvmTarget = "9"
     }
     buildFeatures {
+        // View binding generates a class per layout (ActivityMainBinding ...), no findViewById.
         viewBinding = true
     }
     lint {
+        // New texts are only written in English; translations are added by contributors.
         disable += listOf("MissingTranslation")
     }
+    // Package of the code and of the generated R / BuildConfig classes (not the app id!).
     namespace = "com.katiearose.sobriety"
 }
 
 dependencies {
 
+    // Platform independent code: data model, time calculation, saving/loading (see shared/).
     implementation(project(":shared"))
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
     implementation("androidx.core:core-ktx:1.9.0")

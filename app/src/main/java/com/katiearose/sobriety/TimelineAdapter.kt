@@ -17,11 +17,16 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Standard timeline: one row per attempt with "Attempt N", the start - end dates and the length.
+ * The running attempt (end value 0) shows "ongoing" instead of an end date.
+ */
 class TimelineAdapter(addiction: Addiction, private val context: Context):
     ListAdapter<Pair<Long, Long>, TimelineAdapter.TimelineViewHolder>(object : DiffUtil.ItemCallback<Pair<Long, Long>>() {
         override fun areItemsTheSame(
             oldItem: Pair<Long, Long>,
             newItem: Pair<Long, Long>
+        // Rows are identified by their start time (the key of the history map).
         ): Boolean = oldItem.first == newItem.first
 
         override fun areContentsTheSame(
@@ -42,6 +47,7 @@ class TimelineAdapter(addiction: Addiction, private val context: Context):
     }
 
     override fun onBindViewHolder(holder: TimelineViewHolder, position: Int) {
+        // A pair is (start, end) in epoch milliseconds. An end of 0 means: still running.
         holder.attemptNo.text = context.getString(R.string.attempt, position + 1)
         val pair = currentList[position]
         if (pair.second == 0L) {

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app needs no permissions: all data stays on the device (internal storage). Export and import
+  use the system file picker, which does not need a permission either.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+      Note on privacy: allowBackup="true" lets Android copy the app data to the user's Google
+      account backup (and restore it on a new phone). Because the data is sensitive, consider
+      setting it to "false" and relying on the manual export in the settings instead.
+    -->
     <application
         android:allowBackup="true"
         android:fullBackupContent="true"
@@ -65,6 +74,7 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+        <!-- Main screen = the only activity that can be started from outside (launcher icon). -->
         <activity
             android:name=".activities.Main"
             android:exported="true">

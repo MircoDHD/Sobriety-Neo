@@ -36,16 +36,24 @@ import com.katiearose.sobriety.utils.write
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.io.FileNotFoundException
-import java.time.Instant
-import java.util.*
 
+/**
+ * Main screen: the list of all addictions with their running counters, and the entry point to
+ * all other screens (timeline, summary, notes, savings, milestones, settings, create).
+ */
 class Main : AppCompatActivity() {
 
     companion object {
         const val EXTRA_NAMES = "com.katiearose.sobriety.EXTRA_NAMES"
         // Pass the position of the addiction so that it can be modified
         const val EXTRA_ADDICTION_POSITION = "com.katiearose.sobriety.EXTRA_ADDICTION_POSITION"
+
+        /**
+         * All addictions, kept in a static list so that every screen can reach them. Detail screens
+         * receive only a position in this list. The list is sorted by priority. If Android has
+         * ended the app process this list is empty again and has to be reloaded from disk (see
+         * `loadAddictionFromIntent()` in Utils.kt).
+         */
         val addictions = ArrayList<Addiction>()
     }
 
@@ -53,6 +61,23 @@ class Main : AppCompatActivity() {
     private lateinit var cacheHandler: CacheHandler
     private lateinit var binding: ActivityMainBinding
 
+    // The one timer for all counters on this screen. It only runs while the screen is visible
+    // (started in onResume, stopped in onPause). Once per second it
+    //  1. starts waiting ("Future") addictions whose start time has been reached, and
+    //  2. redraws the counter text of every card.
+    // This replaces the endless coroutine each card used to start (a memory/battery leak) and the
+    // Handler.postDelayed per waiting addiction (which was lost on restart and could be added twice).
+    private val tickHandler = Handler(Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            if (activateDueAddictions()) cacheHandler.write()
+            if (addictions.isNotEmpty())
+                adapterAddictions.notifyItemRangeChanged(0, addictions.size, AddictionCardAdapter.PAYLOAD_TICK)
+            tickHandler.postDelayed(this, 1000)
+        }
+    }
+
+    /** Result of the "create" screen: adds the new addiction to the list and saves it. */
     @SuppressLint("NotifyDataSetChanged")
     private val addNewAddiction =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -62,11 +87,9 @@ class Main : AppCompatActivity() {
                 val instant = data.getLong("instant")
                 val priority =
                     Addiction.Priority.values()[data.getInt("priority")]
+                // If the start lies in the future the status is Future; the timer (see `tick`)
+                // switches it to Ongoing at the right moment.
                 val addiction = Addiction.newInstance(name, instant, priority)
-                if (addiction.status == Addiction.Status.Future) {
-                    // Update status at that point in time
-                    addTimerForFutureAddiction(addiction)
-                }
                 addictions.add(addiction)
                 addictions.sortWith { a1, a2 -> a1.priority.compareTo(a2.priority) }
                 cacheHandler.write()
@@ -74,9 +97,10 @@ class Main : AppCompatActivity() {
             }
         }
 
+    /** Result of the settings screen: after a data import the list has to be sorted and saved. */
     private val goToSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
-            if (it.data!!.extras!!.getBoolean("import")) {
+            if (it.data?.getBooleanExtra("import", false) == true) {
                 addictions.sortWith { a1, a2 -> a1.priority.compareTo(a2.priority) }
                 cacheHandler.write()
             }
@@ -93,6 +117,7 @@ class Main : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false)
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        // Android 9 and older have no system dark mode, so "system" is replaced by "light".
         if (preferences.getString("theme", "system") == "system" &&
             Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
         ) {
@@ -106,23 +131,27 @@ class Main : AppCompatActivity() {
 
         binding.addCardButton.setOnClickListener { newCardDialog() }
         cacheHandler = CacheHandler(this)
+        // Load the saved data (only the first time; the list survives screen rotations).
+        // loadFromDisk() never throws: a damaged file is kept aside and the app still starts.
         if (addictions.isEmpty())
-            try {
-                this.openFileInput("Sobriety.cache").use {
-                    addictions.addAll(cacheHandler.readCache(it))
-                }
-            } catch (_: FileNotFoundException) {
-            }
+            addictions.addAll(cacheHandler.loadFromDisk())
+        // A waiting addiction may have reached its start time while the app was closed.
+        if (activateDueAddictions()) cacheHandler.write()
 
         updatePromptVisibility()
 
         //Create adapter, and layout manager for recyclerview and attach them
         adapterAddictions = AddictionCardAdapter(this, deleteButtonAction =  {
             val action: () -> Unit = {
-                adapterAddictions.notifyItemRemoved(addictions.indexOf(it))
-                addictions.remove(it)
-                updatePromptVisibility()
-                cacheHandler.write()
+                // Remove first, then tell the adapter which position is gone. If the addiction
+                // is not in the list anymore (double tap) nothing happens.
+                val index = addictions.indexOf(it)
+                if (index >= 0) {
+                    addictions.removeAt(index)
+                    adapterAddictions.notifyItemRemoved(index)
+                    updatePromptVisibility()
+                    cacheHandler.write()
+                }
             }
             showConfirmDialog(
                 getString(R.string.delete),
@@ -130,6 +159,8 @@ class Main : AppCompatActivity() {
                 action
             )
         }, relapseButtonAction = {
+            // The same button is "relapse" for a running addiction and "start tracking now" for
+            // a stopped or waiting one.
             val (title, question, extra_action) = when (it.status) {
                 Addiction.Status.Ongoing ->
                     Triple(
@@ -213,6 +244,7 @@ class Main : AppCompatActivity() {
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }, miscButtonAction = { a ->
+            // The "more" button opens a bottom sheet with the notes, savings and milestones screens.
             val dialogViewBinding = DialogMiscBinding.inflate(layoutInflater)
             val dialog = BottomSheetDialog(this@Main)
             dialogViewBinding.dailyNotes.setOnClickListener {
@@ -239,6 +271,7 @@ class Main : AppCompatActivity() {
             dialog.setContentView(dialogViewBinding.root)
             dialog.show()
         }, cardButtonAction = {
+            // Tapping the card itself opens the summary (progress bars).
             when(it.status) {
                 Addiction.Status.Ongoing, Addiction.Status.Stopped ->
                     startActivity(
@@ -257,23 +290,26 @@ class Main : AppCompatActivity() {
         })
         binding.recyclerAddictions.layoutManager = LinearLayoutManager(this)
         binding.recyclerAddictions.adapter = adapterAddictions
+    }
 
-        // Add a timer to start an attempt on future addictions
+    /**
+     * Starts every waiting addiction whose start time has passed.
+     *
+     * @return true if at least one addiction changed, so the caller has to save the data
+     */
+    private fun activateDueAddictions(): Boolean {
+        val now = System.currentTimeMillis()
+        var changed = false
         for (addiction in addictions) {
-            if (addiction.status == Addiction.Status.Future)
-                addTimerForFutureAddiction(addiction)
+            if (addiction.activateIfDue(now)) changed = true
         }
+        return changed
     }
 
-    private fun addTimerForFutureAddiction(addiction: Addiction) {
-        // Also works for negative delays
-        // See https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/Handler.java#693
-        val delay = addiction.history.keys.last() - Instant.now().toEpochMilli()
-        Handler(Looper.getMainLooper()).postDelayed({
-            addiction.status = Addiction.Status.Ongoing
-        }, delay)
-    }
-
+    /**
+     * Asks the user whether to write a note about the relapse (can be turned off in the
+     * settings or with the "don't show again" checkbox). The note is saved for today's date.
+     */
     private fun showAddNoteAfterRelapseDialogIfEnabled(addiction: Addiction) {
         val pref = getSharedPref()
         if (pref.getAddNoteAfterRelapsePref()) {
@@ -305,6 +341,7 @@ class Main : AppCompatActivity() {
         }
     }
 
+    /** Shows the "add your first addiction" hint only while the list is empty. */
     private fun updatePromptVisibility() {
         binding.prompt.visibility = if (addictions.isEmpty()) View.VISIBLE else View.GONE
     }
@@ -318,11 +355,20 @@ class Main : AppCompatActivity() {
 
     /**
      * This gets called once the Create Activity is closed (Necessary to hide the prompt in case
-     * a first addiction was added to the list.
+     * a first addiction was added to the list). It also starts the one-second counter timer.
      */
     override fun onResume() {
         updatePromptVisibility()
         super.onResume()
+        // Restart the timer; the first run happens right away so the counters are never stale.
+        tickHandler.removeCallbacks(tick)
+        tickHandler.post(tick)
+    }
+
+    /** The screen is no longer visible, so stop the timer (saves battery). */
+    override fun onPause() {
+        tickHandler.removeCallbacks(tick)
+        super.onPause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

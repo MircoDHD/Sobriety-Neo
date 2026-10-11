@@ -20,7 +20,13 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
+/**
+ * Screen for adding a new addiction: name, start date and time (can be in the past or future)
+ * and priority. The result is returned to [Main] through the intent extras
+ * "name", "instant" (epoch milliseconds) and "priority" (ordinal).
+ */
 class Create : AppCompatActivity() {
+    // The chosen start. Starts as "now" and is changed by the date and time pickers.
     private var startDateTime = ZonedDateTime.now(ZoneId.systemDefault())
     private var priority = Addiction.Priority.MEDIUM
 
@@ -56,6 +62,7 @@ class Create : AppCompatActivity() {
         names = intent.getStringArrayListExtra(Main.EXTRA_NAMES) as ArrayList<String>
     }
 
+    /** Shows a notice if the chosen start is in the future (the addiction will be "waiting"). */
     private fun checkFutureDateTime() {
         binding.futureTimeNotice.visibility = if (startDateTime > ZonedDateTime.now()) View.VISIBLE else View.GONE
     }
@@ -87,6 +94,8 @@ class Create : AppCompatActivity() {
             .setTitleText(R.string.pick_starting_date)
             .build()
         datePicker.addOnPositiveButtonClickListener {
+            // The date picker returns midnight in UTC; read the date in UTC and then combine it
+            // with the time of day in the local time zone.
             startDateTime = ZonedDateTime.of(
                 Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate(),
                 startDateTime.toLocalTime(),
@@ -101,8 +110,9 @@ class Create : AppCompatActivity() {
     private fun pickTime() {
         val timePicker = MaterialTimePicker.Builder()
             .setTitleText(R.string.pick_starting_time)
-            .setHour(ZonedDateTime.now().hour)
-            .setMinute(ZonedDateTime.now().minute)
+            // Open the picker at the time that is already chosen, not at the current time.
+            .setHour(startDateTime.hour)
+            .setMinute(startDateTime.minute)
             .build()
         timePicker.addOnPositiveButtonClickListener {
             startDateTime = ZonedDateTime.of(
@@ -116,6 +126,7 @@ class Create : AppCompatActivity() {
         timePicker.show(supportFragmentManager, null)
     }
 
+    /** Checks the name and returns the result to the main screen. */
     private fun create() {
         val name = binding.etTitle.text.toString()
         val nameExists = names.contains(name)

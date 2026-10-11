@@ -1,3 +1,6 @@
+// Build file of the shared module: code that does not depend on Android and could also be used by
+// the iOS port. The data model (Addiction), the time calculation (ElapsedTime), JSON conversion
+// and the unit tests live here.
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -24,6 +27,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
             }
         }
+        // Unit tests in src/commonTest run on the JVM during "./gradlew build" (also in CI).
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))

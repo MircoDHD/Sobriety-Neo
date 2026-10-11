@@ -12,14 +12,14 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.katiearose.sobriety.R
 import com.katiearose.sobriety.activities.Main
+import com.katiearose.sobriety.shared.Addiction
 import com.katiearose.sobriety.shared.CacheHandler
+import com.katiearose.sobriety.shared.ElapsedTime
 import kotlinx.datetime.DateTimeUnit
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.Period
-import java.util.*
 
+// Approximate lengths in seconds. They are only used by convertSecondsToString() for *durations*
+// (for example the average length of earlier attempts). Counting up from a real date uses
+// ElapsedTime instead, which follows the calendar.
 private const val MINUTE = 60
 private const val HOUR = MINUTE * 60
 private const val DAY = HOUR * 24
@@ -27,7 +27,15 @@ private const val WEEK = DAY * 7
 private const val YEAR = (DAY * 365.25).toInt()
 private const val MONTH = YEAR / 12
 
-
+/**
+ * Turns a length of time into text like "1 month 2 weeks 3 days 4 hours 5 minutes and 6 seconds".
+ *
+ * This is for **durations without a start date** (average of earlier attempts, length of a
+ * finished attempt). A month is counted as 1/12 of 365.25 days, so the result is a good
+ * approximation, not a calendar calculation. For the running counter use [convertRangeToString].
+ *
+ * @param given number of seconds; -1 returns an empty string
+ */
 fun Context.convertSecondsToString(given: Long): String {
     if (given == -1L) return ""
     var time = given
@@ -51,6 +59,7 @@ fun Context.convertSecondsToString(given: Long): String {
     if (d != 0L) stringBuilder.append(resources.getQuantityString(R.plurals.days, d.toInt(), d)).append(" ")
     if (h != 0L) stringBuilder.append(resources.getQuantityString(R.plurals.hours, h.toInt(), h)).append(" ")
     if (m != 0L) stringBuilder.append(resources.getQuantityString(R.plurals.minutes, m.toInt(), m)).append(" ")
+    // "and" is only inserted when there is something before the seconds.
     if (!(y == 0L && mo == 0L && w == 0L && d == 0L && h == 0L && m == 0L)) stringBuilder.append(
         getString(R.string.and)
     ).append(" ")
@@ -58,32 +67,29 @@ fun Context.convertSecondsToString(given: Long): String {
     return stringBuilder.toString()
 }
 
-// Expects start and end timestamps in epoch milliseconds
-fun Context.convertRangeToString(start: Long, end: Long = Instant.now().toEpochMilli()): String {
+/**
+ * Text for the time between two moments, for example "2 months 1 week 3 days 4 hours 5 minutes
+ * and 6 seconds". This is the running counter on the main screen.
+ *
+ * The numbers come from [ElapsedTime], which fixes the old bug where the counter showed exactly
+ * one day too much (the old version mixed calendar days with elapsed hours).
+ *
+ * @param start start in epoch milliseconds; -1 returns an empty string
+ * @param end end in epoch milliseconds, defaults to now
+ */
+fun Context.convertRangeToString(start: Long, end: Long = System.currentTimeMillis()): String {
     if (start == -1L) return ""
-    val startDate: LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(start),
-        TimeZone.getDefault().toZoneId())
-    val endDate: LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(end),
-        TimeZone.getDefault().toZoneId())
-    // Duration calculated time based days rather than "conceptual" days
-    // Used directly for hours, minutes, seconds
-    val duration: Duration = Duration.between(startDate, endDate)
-    // Period for years, months, weeks, days
-    val period: Period = Period.between(
-        // The reason why startDate is not used is to prevent a conceptual calculation of days
-        // i.e. 2023-01-30T23:30 to 2023-01-31TT01:30 is 1 conceptual day but only 2 literal hours
-        endDate.minusDays(duration.toDaysPart()).toLocalDate(),
-        endDate.toLocalDate()
-    )
+    val elapsed = ElapsedTime.between(start, end)
 
-    val y = period.years
-    val mo = period.months
-    val d = period.days % 7
-    val w = period.days / 7
-    val h = duration.toHoursPart()
-    val m = duration.toMinutesPart()
-    val s = duration.toSecondsPart()
+    val y = elapsed.years
+    val mo = elapsed.months
+    val w = elapsed.weeks
+    val d = elapsed.days
+    val h = elapsed.hours
+    val m = elapsed.minutes
+    val s = elapsed.seconds
 
+    // Units that are zero are left out ("3 days and 5 seconds" instead of "0 months 3 days ...").
     val stringBuilder = StringBuilder()
     if (y != 0) stringBuilder.append(resources.getQuantityString(R.plurals.years, y, y)).append(" ")
     if (mo != 0) stringBuilder.append(resources.getQuantityString(R.plurals.months, mo, mo)).append(" ")
@@ -98,48 +104,46 @@ fun Context.convertRangeToString(start: Long, end: Long = Instant.now().toEpochM
     return stringBuilder.toString()
 }
 
-// Each triple contains the raw number (e.g. 12), the percentage in per mille (500), and the unit (hours)
-fun convertRangeToPercentList(start: Long, end: Long = Instant.now().toEpochMilli())
+/**
+ * Data for the progress bars on the summary screen: one bar per unit (years, months, days, hours,
+ * minutes, seconds).
+ *
+ * Each triple contains the raw number (e.g. 12), the progress in per mille (0..1000, for example
+ * 500 = half full), and the unit (hours).
+ *
+ * The bars fill up towards the next bigger unit: the hour bar goes to 24, the minute and second
+ * bars to 60, the day bar to the length of the current month, the month bar to 12. The year bar
+ * has no natural end, so it crosses 50% at 2 years and never completes.
+ *
+ * @param start start in epoch milliseconds
+ * @param end end in epoch milliseconds, defaults to now (pass the stop time of a stopped addiction)
+ */
+fun convertRangeToPercentList(start: Long, end: Long = System.currentTimeMillis())
         : List<Triple<Int, Int, DateTimeUnit>> {
-    val startDate: LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(start),
-        TimeZone.getDefault().toZoneId())
-    val endDate: LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(end),
-        TimeZone.getDefault().toZoneId())
-    // Duration calculated time based days rather than "conceptual" days
-    // Used directly for hours, minutes, seconds
-    val duration: Duration = Duration.between(startDate, endDate)
-    // Period for years, months, weeks, days
-    val period: Period = Period.between(
-        // The reason why startDate is not used is to prevent a conceptual calculation of days
-        // i.e. 2023-01-30T23:30 to 2023-01-31TT01:30 is 1 conceptual day but only 2 literal hours
-        endDate.minusDays(duration.toDaysPart()).toLocalDate(),
-        endDate.toLocalDate()
-    )
+    val elapsed = ElapsedTime.between(start, end)
 
-    // Calculate the number of days until the month period ends
-    val nextMonth = startDate.plus(Period.of(period.years, period.months + 1, 0))
-    val durationLeft = Duration.between(endDate, nextMonth)
-    val daysLeft = (duration.plus(durationLeft).toDaysPart() - duration.toDaysPart()).toInt()
-
-    // Initially store denominator in second part of triple
+    // Weeks make the visualization non-whole so they are omitted.
+    // Initially the maximum ("denominator") is stored in the second part of the triple and is
+    // turned into the per mille value in the map() below.
     return listOf(
-        // Years progress bar should never complete, but crosses 50% at 2 years
-        Triple(period.years, period.years+2, DateTimeUnit.YEAR),
-        Triple(period.months, 12, DateTimeUnit.MONTH),
-        // Weeks make the visualization non-whole so they are omitted
-        Triple(period.days, period.days + daysLeft, DateTimeUnit.DAY),
-        Triple(duration.toHoursPart(), 24, DateTimeUnit.HOUR),
-        Triple(duration.toMinutesPart(), 60, DateTimeUnit.MINUTE),
-        Triple(duration.toSecondsPart(), 60, DateTimeUnit.SECOND)
+        Triple(elapsed.years, elapsed.years + 2, DateTimeUnit.YEAR),
+        Triple(elapsed.months, 12, DateTimeUnit.MONTH),
+        // The day bar uses the days of the running month (not only 0..6) and its real length.
+        Triple(elapsed.daysIntoCycle, elapsed.daysInCycle, DateTimeUnit.DAY),
+        Triple(elapsed.hours, 24, DateTimeUnit.HOUR),
+        Triple(elapsed.minutes, 60, DateTimeUnit.MINUTE),
+        Triple(elapsed.seconds, 60, DateTimeUnit.SECOND)
     ).map {
         Triple(
             it.first,
-            (1000 * it.first.toDouble().div(it.second)).toInt(),
+            // coerceIn: a bar can never be fuller than 100%.
+            (1000 * it.first.toDouble().div(it.second)).toInt().coerceIn(0, 1000),
             it.third
         )
     }
 }
 
+/** Shows a dialog with OK and Cancel. [action] is only run when the user presses OK. */
 fun Context.showConfirmDialog(title: String, message: String, action: () -> Unit) {
     MaterialAlertDialogBuilder(this)
         .setTitle(title)
@@ -149,6 +153,10 @@ fun Context.showConfirmDialog(title: String, message: String, action: () -> Unit
         .show()
 }
 
+/**
+ * Applies the theme the user chose in the settings (light / dark / system and Material You).
+ * Has to be called at the start of every activity, before `super.onCreate`.
+ */
 fun Activity.applyThemes() {
     val preferences = PreferenceManager.getDefaultSharedPreferences(this)
     when (preferences.getString("theme", "system")) {
@@ -161,23 +169,55 @@ fun Activity.applyThemes() {
     } else setTheme(R.style.Theme_Sobriety)
 }
 
+/**
+ * Reads which addiction an activity should show from the intent (the position in
+ * [Main.addictions]). Fails with an exception if the activity was started without it.
+ */
 fun Activity.checkValidIntentData() : Int {
     val index = intent.getIntExtra(Main.EXTRA_ADDICTION_POSITION, -1)
     require(index != -1) { "Invalid intent data received" }
     return index
 }
 
+/**
+ * Returns the addiction this activity was opened for, or null if it does not exist (the caller
+ * should then call `finish()`).
+ *
+ * The list of addictions lives in a static variable ([Main.addictions]). When Android ends the app
+ * process in the background and the user later returns to a detail screen (summary, timeline,
+ * notes...), Android recreates only that screen and the static list is empty. The old code then
+ * crashed with an IndexOutOfBoundsException. Here the data is read from disk in that case.
+ */
+fun Activity.loadAddictionFromIntent(): Addiction? {
+    val index = checkValidIntentData()
+    if (Main.addictions.isEmpty()) Main.addictions.addAll(CacheHandler(this).loadFromDisk())
+    return Main.addictions.getOrNull(index)
+}
+
 fun AppCompatEditText.isInputEmpty(): Boolean = text == null || text.toString().isBlank()
 
+/**
+ * Parses a number that a person typed, accepting both "4.50" and "4,50".
+ * Many keyboards (for example with German settings) type a comma as the decimal separator, and
+ * `String.toDouble()` throws an exception for it, which crashed the app.
+ *
+ * @return the number, or null if the text is not a normal, non-negative number
+ */
+fun String.toDoubleLenient(): Double? =
+    trim().replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() && it >= 0.0 }
+
+/** Switches between visible and gone. */
 fun View.toggleVisibility() {
     visibility = if (visibility == View.VISIBLE) View.GONE else View.VISIBLE
 }
 
 fun Context.toast(@StringRes textRes: Int) = Toast.makeText(this, textRes, Toast.LENGTH_SHORT).show()
 
+/** Lets code write `textView.textResource = R.string.x`. Setting works, reading is not supported. */
 inline var TextView.textResource: Int
     set(@StringRes value) = setText(value)
     @Deprecated("This property is set-only, don't bother.", level = DeprecationLevel.HIDDEN)
     get() = error("don't")
 
+/** Saves all addictions of the app ([Main.addictions]) to disk. */
 fun CacheHandler.write() = writeCache(Main.addictions)

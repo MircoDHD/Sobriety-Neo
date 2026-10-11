@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.katiearose.sobriety.databinding.ListItemNoteBinding
 import com.katiearose.sobriety.shared.Addiction
@@ -19,6 +20,10 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * List of the daily notes of one addiction, sorted according to the setting. Every note can be
+ * expanded / collapsed, edited and deleted.
+ */
 class NoteAdapter(
     private val addiction: Addiction, context: Context,
     private val editButtonAction: (Pair<LocalDate, String>) -> Unit,
@@ -42,6 +47,7 @@ class NoteAdapter(
 
     private val dateFormat = DateTimeFormatter.ofPattern(preferences.getDateFormatPattern())
 
+    /** Reads the sort setting and redraws the list. */
     fun update() {
         submitList(when (preferences.getSortNotesPref()) {
             "asc" -> addiction.getDailyNotesList(SortMode.ASC)
@@ -72,8 +78,14 @@ class NoteAdapter(
         val note = binding.note
 
         init {
-            binding.btnEdit.setOnClickListener { editButtonAction(adapterPosition) }
-            binding.btnDelete.setOnClickListener { deleteButtonAction(adapterPosition) }
+            // Ignore taps while the position is unknown (row is being removed) instead of crashing.
+            binding.btnEdit.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) editButtonAction(adapterPosition)
+            }
+            binding.btnDelete.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) deleteButtonAction(adapterPosition)
+            }
+            // Show or hide the text of the note.
             binding.btnExpandCollapse.setOnClickListener {
                 binding.noteCard.toggleVisibility()
                 binding.btnExpandCollapse.setImageResource(if (binding.noteCard.visibility == View.VISIBLE) R.drawable.expand_less_24px else R.drawable.expand_more_24px)

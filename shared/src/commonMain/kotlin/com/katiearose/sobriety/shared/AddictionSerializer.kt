@@ -13,6 +13,20 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.*
 
+/**
+ * Converts an [Addiction] to and from JSON.
+ *
+ * This is hand written (instead of the generated serializer) so that files written by older
+ * versions of the app can still be read. **Every user's data is stored with this format**, so be
+ * very careful when changing it:
+ *  - never change the position or name of an existing element in [descriptor],
+ *  - only append new elements at the END of the "current keys" block, before the legacy keys,
+ *  - the reader ignores unknown keys, so new fields do not break old files.
+ *
+ * JSON keys (in the order of their element index):
+ * `name, status, history, priority, daily_notes, time_saving, savings, milestones` and the
+ * legacy keys `last_relapse, is_stopped`.
+ */
 object AddictionSerializer : KSerializer<Addiction> {
     private val historySerializer = MapSerializer(Long.serializer(), Long.serializer())
     private val dailyNotesSerializer = MapSerializer(LocalDateIso8601Serializer, String.serializer())
@@ -22,6 +36,7 @@ object AddictionSerializer : KSerializer<Addiction> {
     @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): Addiction =
         decoder.decodeStructure(descriptor) {
+            // Defaults are used for every key that is missing in the file.
             var name = ""
             var status = Addiction.Status.Ongoing
             val history = LinkedHashMap<Long, Long>()
@@ -30,22 +45,28 @@ object AddictionSerializer : KSerializer<Addiction> {
             var timeSaving = LocalTime(0, 0)
             var savings = LinkedHashMap<String, Pair<Double, String>>()
             var milestones = LinkedHashSet<Pair<Int, DateTimeUnit>>()
+            // Only set when the file was written by a very old version (see key 8 below).
+            var legacyLastRelapse: Instant? = null
             while (true) {
                 when (val i = decodeElementIndex(descriptor)) {
                     0 -> name = decodeStringElement(descriptor, i)
                     1 -> status = Addiction.Status.valueOf(decodeStringElement(descriptor, i))
                     // putAll rather than reassign for last_relapse legacy key
                     2 -> history.putAll(LinkedHashMap(decodeSerializableElement(descriptor, i, historySerializer)))
-                    3 -> priority = Addiction.Priority.values()[decodeIntElement(descriptor, i)]
+                    // A priority outside of the known range falls back to MEDIUM instead of crashing.
+                    3 -> priority = Addiction.Priority.values()
+                        .getOrElse(decodeIntElement(descriptor, i)) { Addiction.Priority.MEDIUM }
                     4 -> dailyNotes = LinkedHashMap(decodeSerializableElement(descriptor, i, dailyNotesSerializer))
                     5 -> timeSaving = decodeSerializableElement(descriptor, i, LocalTimeIso8601Serializer)
                     6 -> savings = LinkedHashMap(decodeSerializableElement(descriptor, i, savingsSerializer))
                     7 -> milestones = LinkedHashSet(decodeSerializableElement(descriptor, i, milestonesSerializer))
 
                     // Legacy keys
-                    // last_relapse
+                    // last_relapse: the single start time that very old versions stored
+                    // instead of a history.
                     8 -> {
                         val lastRelapse = decodeSerializableElement(descriptor, i, InstantComponentSerializer)
+                        legacyLastRelapse = lastRelapse
                         if (lastRelapse > Clock.System.now()) {
                             status = Addiction.Status.Future
                             history[lastRelapse.toEpochMilliseconds()] = 0
@@ -56,6 +77,15 @@ object AddictionSerializer : KSerializer<Addiction> {
 
                     CompositeDecoder.DECODE_DONE -> break
                 }
+            }
+
+            // The rest of the app relies on the history having at least one entry (it reads
+            // history.keys.last() everywhere). If a file has none, create one instead of crashing
+            // later with a NoSuchElementException.
+            if (history.isEmpty()) {
+                val start = legacyLastRelapse?.toEpochMilliseconds() ?: Clock.System.now().toEpochMilliseconds()
+                // A stopped addiction needs a finished attempt, so give it a zero-length one.
+                history[start] = if (status == Addiction.Status.Stopped) start else 0
             }
 
             Addiction(name, status, history, priority, dailyNotes, timeSaving, savings, milestones)
@@ -73,6 +103,7 @@ object AddictionSerializer : KSerializer<Addiction> {
             element<LinkedHashSet<Pair<Int, DateTimeUnit>>>("milestones")
 
             // Legacy keys
+            // They are only read, never written (see serialize below).
             element<Instant>("last_relapse")
             element<Boolean>("is_stopped")
         }

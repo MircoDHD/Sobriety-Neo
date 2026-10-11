@@ -5,10 +5,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.katiearose.sobriety.databinding.ListItemSavingBinding
 import com.katiearose.sobriety.shared.Addiction
 
+/**
+ * List of the "other savings" of one addiction (name and amount saved per day), with buttons to
+ * edit and delete each one.
+ */
 class SavingsAdapter(private val addiction: Addiction, private val context: Context,
                      private val editButtonAction: (Pair<String, Pair<Double, String>>) -> Unit,
                      private val deleteButtonAction: (Pair<String, Pair<Double, String>>) -> Unit):
@@ -26,6 +31,7 @@ class SavingsAdapter(private val addiction: Addiction, private val context: Cont
     }) {
     init { update() }
 
+    /** Redraws the list from [Addiction.savings]. */
     fun update() = submitList(addiction.savings.toList())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SavingsViewHolder {
@@ -47,8 +53,13 @@ class SavingsAdapter(private val addiction: Addiction, private val context: Cont
         val savingName = binding.savingsName
         val savingsAmountPerDay = binding.savingsAmountPerDay
         init {
-            binding.btnEditSaving.setOnClickListener { editButtonAction(adapterPosition) }
-            binding.btnDeleteSaving.setOnClickListener { deleteButtonAction(adapterPosition) }
+            // Ignore taps while the position is unknown (row is being removed) instead of crashing.
+            binding.btnEditSaving.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) editButtonAction(adapterPosition)
+            }
+            binding.btnDeleteSaving.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) deleteButtonAction(adapterPosition)
+            }
         }
     }
 }

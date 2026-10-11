@@ -30,6 +30,9 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+# The fork uses ONE fixed debug key so that new builds install over old ones. It is public on purpose
+# (password "android") and must never be used to publish a store/release build.
+!app/fork-debug.keystore
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json

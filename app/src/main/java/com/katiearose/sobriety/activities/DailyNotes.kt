@@ -13,7 +13,7 @@ import com.katiearose.sobriety.databinding.DialogAddNoteBinding
 import com.katiearose.sobriety.shared.Addiction
 import com.katiearose.sobriety.shared.CacheHandler
 import com.katiearose.sobriety.utils.applyThemes
-import com.katiearose.sobriety.utils.checkValidIntentData
+import com.katiearose.sobriety.utils.loadAddictionFromIntent
 import com.katiearose.sobriety.utils.getDateFormatPattern
 import com.katiearose.sobriety.utils.getSharedPref
 import com.katiearose.sobriety.utils.isInputEmpty
@@ -22,6 +22,10 @@ import com.katiearose.sobriety.utils.write
 import kotlinx.datetime.*
 import java.time.format.DateTimeFormatter
 
+/**
+ * "Daily notes" screen of one addiction: one free-text note per calendar day (a small diary).
+ * Opened from the "more" button on a card.
+ */
 class DailyNotes : AppCompatActivity() {
 
     private lateinit var binding: ActivityDailyNotesBinding
@@ -38,7 +42,10 @@ class DailyNotes : AppCompatActivity() {
         dateFormat = DateTimeFormatter.ofPattern(getSharedPref().getDateFormatPattern())
         cacheHandler = CacheHandler(this)
 
-        addiction = Main.addictions[checkValidIntentData()]
+        addiction = loadAddictionFromIntent() ?: run {
+            finish()
+            return
+        }
         adapter = NoteAdapter(addiction, this, { showAddNoteDialog(true, it.first) },
             {
                 val action: () -> Unit = {
@@ -54,6 +61,13 @@ class DailyNotes : AppCompatActivity() {
             TimeZone.currentSystemDefault()).date) }
     }
 
+    /**
+     * Shows the bottom sheet to write a note.
+     *
+     * @param isEdit true to edit the existing note of [date] (the date can not be changed then),
+     *   false to write a new note, where the date can be picked (default: today)
+     * @param date the date of the note
+     */
     private fun showAddNoteDialog(isEdit: Boolean, date: LocalDate) {
         var pickedDate = date
         val dialogViewBinding = DialogAddNoteBinding.inflate(layoutInflater)
@@ -68,6 +82,8 @@ class DailyNotes : AppCompatActivity() {
             dialogViewBinding.noteDate.setOnClickListener {
                 with(MaterialDatePicker.Builder.datePicker().build()) {
                     addOnPositiveButtonClickListener {
+                        // The date picker returns midnight in UTC, so convert it in UTC as well.
+                        // Using the local zone here could shift the date by one day.
                         pickedDate = Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.UTC).date
                         dialogViewBinding.noteDate.text = dateFormat.format(pickedDate.toJavaLocalDate())
                         if (addiction.dailyNotes.contains(pickedDate)) {
@@ -90,6 +106,7 @@ class DailyNotes : AppCompatActivity() {
         dialog.show()
     }
 
+    /** Saves the notes and refreshes the list. */
     private fun updateNotesList() {
         cacheHandler.write()
         adapter.update()

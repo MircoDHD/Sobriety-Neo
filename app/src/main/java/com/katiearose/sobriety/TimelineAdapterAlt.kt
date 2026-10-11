@@ -17,6 +17,12 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Alternative timeline with a vertical line (library "timelineview"). The history is flattened
+ * into one list of moments: start of attempt 1, end of attempt 1, start of attempt 2, ... so
+ * every even position is a start and every odd position is an end (0 = still running, shown
+ * as "present").
+ */
 class TimelineAdapterAlt(context: Context, addiction: Addiction) : ListAdapter<Long, TimelineAdapterAlt.TimelineAltViewHolder>(
     object : DiffUtil.ItemCallback<Long>() {
         override fun areItemsTheSame(oldItem: Long, newItem: Long): Boolean = oldItem == newItem
@@ -67,6 +73,10 @@ class TimelineAdapterAlt(context: Context, addiction: Addiction) : ListAdapter<L
         }
     }
 
+    /**
+     * Chooses how the line is drawn at this row (start, middle or end piece), so that the
+     * attempts look like connected segments with gaps between them.
+     */
     override fun getItemViewType(position: Int): Int {
         return when {
             position == 0 -> LineType.START

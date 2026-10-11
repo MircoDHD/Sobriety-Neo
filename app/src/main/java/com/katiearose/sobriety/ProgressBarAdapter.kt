@@ -9,11 +9,16 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.katiearose.sobriety.databinding.ListItemProgressBarBinding
 import com.katiearose.sobriety.shared.Addiction
 import com.katiearose.sobriety.utils.convertRangeToPercentList
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 
+/**
+ * List of progress bars on the summary screen (one bar per unit: years, months, days, hours,
+ * minutes, seconds). Units that are still 0 at the top are left out.
+ *
+ * The adapter does not refresh itself. The [com.katiearose.sobriety.activities.Summary] activity
+ * calls [update] every second while it is visible. (The old version started a timer in this class
+ * that was never stopped.)
+ */
 class ProgressBarAdapter(
     private val addiction: Addiction, private val context: Context,
 ) :
@@ -24,26 +29,32 @@ class ProgressBarAdapter(
             newItem: Triple<Int, Int, DateTimeUnit>
         ): Boolean = oldItem.third == newItem.third
 
+        // Triple.first is the number, second the per mille. Both can change independently
+        // (for example when the month changes length), so compare the whole value.
         override fun areContentsTheSame(
             oldItem: Triple<Int, Int, DateTimeUnit>,
             newItem: Triple<Int, Int, DateTimeUnit>
-        ): Boolean = oldItem.first == newItem.first
+        ): Boolean = oldItem == newItem
     }) {
 
     init {
         update()
-        MainScope().launch {
-            while (true) {
-                update()
-                delay(1000)
-            }
-        }
     }
 
+    /** Recalculates all bars for the current moment. */
     fun update() {
-        val list = convertRangeToPercentList(addiction.history.keys.last())
-        // Filter initial zeros
-        submitList(list.subList(list.indexOfFirst { it.first != 0 }, list.size))
+        // A stopped addiction stops counting at the moment it was stopped. The old code kept
+        // counting up to "now", so the summary of a stopped addiction kept growing.
+        val end = if (addiction.status == Addiction.Status.Stopped)
+            addiction.history.values.last()
+        else
+            System.currentTimeMillis()
+        val list = convertRangeToPercentList(addiction.history.keys.last(), end)
+        // Filter initial zeros (for example no "0 years" bar). If everything is zero (right after
+        // a relapse, or a stopped attempt of length 0) indexOfFirst returns -1 and the old code
+        // crashed with subList(-1, ...). Show only the seconds bar in that case.
+        val firstNonZero = list.indexOfFirst { it.first != 0 }
+        submitList(if (firstNonZero == -1) list.takeLast(1) else list.subList(firstNonZero, list.size))
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProgressBarViewHolder {

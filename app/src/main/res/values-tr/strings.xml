@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sobriety</string>
+    <string name="app_name">Sobriety Neo</string>
     <string name="prompt">İzleyiciye bir bağımlılık eklemek için sağ alt köşedeki \"+\" düğmesine basın.</string>
     <string name="add_new_addiction">Yeni bağımlılık ekle</string>
     <string name="addiction_name">Bağımlılık adı</string>

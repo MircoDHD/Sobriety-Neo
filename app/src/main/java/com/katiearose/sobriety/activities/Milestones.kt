@@ -11,13 +11,26 @@ import com.katiearose.sobriety.databinding.DialogAddMilestoneBinding
 import com.katiearose.sobriety.shared.Addiction
 import com.katiearose.sobriety.shared.CacheHandler
 import com.katiearose.sobriety.utils.applyThemes
-import com.katiearose.sobriety.utils.checkValidIntentData
 import com.katiearose.sobriety.utils.isInputEmpty
+import com.katiearose.sobriety.utils.loadAddictionFromIntent
 import com.katiearose.sobriety.utils.showConfirmDialog
 import com.katiearose.sobriety.utils.write
 import kotlinx.datetime.DateTimeUnit
 
+/**
+ * "Milestones" screen of one addiction: goals like "7 days" with a progress bar and the date on
+ * which they will be reached. Opened from the "more" button on a card.
+ */
 class Milestones : AppCompatActivity() {
+
+    private companion object {
+        /**
+         * Largest number accepted for a milestone ("9999 years" is still far more than a life).
+         * Without a limit a huge number caused a crash (it did not fit into an Int, or the date
+         * calculation overflowed).
+         */
+        const val MAX_AMOUNT = 9999
+    }
 
     private lateinit var binding: ActivityMilestonesBinding
     private lateinit var addiction: Addiction
@@ -31,7 +44,10 @@ class Milestones : AppCompatActivity() {
         setContentView(binding.root)
         cacheHandler = CacheHandler(this)
 
-        addiction = Main.addictions[checkValidIntentData()]
+        addiction = loadAddictionFromIntent() ?: run {
+            finish()
+            return
+        }
         adapter = MilestoneAdapter(addiction, this) {
             val action: () -> Unit = {
                 addiction.milestones.remove(it)
@@ -44,6 +60,7 @@ class Milestones : AppCompatActivity() {
         binding.milestoneList.setHasFixedSize(true)
         binding.milestoneList.adapter = adapter
 
+        // The "+" button opens a bottom sheet with a number and a unit (hours ... years).
         binding.addMilestoneFab.setOnClickListener {
             val dialogViewBinding = DialogAddMilestoneBinding.inflate(layoutInflater)
             val dialog = BottomSheetDialog(this)
@@ -51,10 +68,16 @@ class Milestones : AppCompatActivity() {
             val units = resources.getStringArray(R.array.time_units)
             dialogViewBinding.btnSaveMilestone.setOnClickListener {
                 val inputFields = listOf(dialogViewBinding.milestoneNumberInputLayout, dialogViewBinding.milestoneTimeUnitInputLayout)
+                // null if the text is empty or too big for an Int (the old toInt() crashed)
+                val number = dialogViewBinding.milestoneNumberInput.text.toString().toIntOrNull()
                 when {
-                    dialogViewBinding.milestoneNumberInput.isInputEmpty() ||
-                            dialogViewBinding.milestoneNumberInput.text.toString().toInt() == 0 -> {
+                    dialogViewBinding.milestoneNumberInput.isInputEmpty() || number == 0 -> {
                         dialogViewBinding.milestoneNumberInputLayout.error = getString(R.string.error_empty_amount)
+                        inputFields.forEach { if (it !== dialogViewBinding.milestoneNumberInputLayout) it.error = null }
+                    }
+                    number == null || number > MAX_AMOUNT -> {
+                        dialogViewBinding.milestoneNumberInputLayout.error =
+                            getString(R.string.error_amount_too_large, MAX_AMOUNT)
                         inputFields.forEach { if (it !== dialogViewBinding.milestoneNumberInputLayout) it.error = null }
                     }
                     dialogViewBinding.unitInput.text.toString().isEmpty() -> {
@@ -62,13 +85,13 @@ class Milestones : AppCompatActivity() {
                         inputFields.forEach { if (it !== dialogViewBinding.milestoneTimeUnitInputLayout) it.error = null }
                     }
                     else -> {
-                        val num = dialogViewBinding.milestoneNumberInput.text.toString().toInt()
+                        // The unit is chosen from a dropdown; its position matches R.array.time_units.
                         when (dialogViewBinding.unitInput.text.toString()) {
-                            units[0] -> addiction.milestones.add(Pair(num, DateTimeUnit.HOUR))
-                            units[1] -> addiction.milestones.add(Pair(num, DateTimeUnit.DAY))
-                            units[2] -> addiction.milestones.add(Pair(num, DateTimeUnit.WEEK))
-                            units[3] -> addiction.milestones.add(Pair(num, DateTimeUnit.MONTH))
-                            units[4] -> addiction.milestones.add(Pair(num, DateTimeUnit.YEAR))
+                            units[0] -> addiction.milestones.add(Pair(number, DateTimeUnit.HOUR))
+                            units[1] -> addiction.milestones.add(Pair(number, DateTimeUnit.DAY))
+                            units[2] -> addiction.milestones.add(Pair(number, DateTimeUnit.WEEK))
+                            units[3] -> addiction.milestones.add(Pair(number, DateTimeUnit.MONTH))
+                            units[4] -> addiction.milestones.add(Pair(number, DateTimeUnit.YEAR))
                         }
                         cacheHandler.write()
                         adapter.update()
@@ -80,6 +103,7 @@ class Milestones : AppCompatActivity() {
         }
     }
 
+    /** Saves the change and refreshes the list. */
     private fun update() {
         cacheHandler.write()
         adapter.update()

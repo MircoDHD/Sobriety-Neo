@@ -21,6 +21,7 @@ import kotlinx.serialization.Serializable
  * @property milestones goals such as "7 days" or "3 months"
  * @property savingsMeta (Sobriety Neo) category and entered rate of each saving, see SavingsCalculator.kt
  * @property relapseCosts (Sobriety Neo) money and time spent during relapses, see SavingsCalculator.kt
+ * @property display (Sobriety Neo) how the time is shown on the card, see DisplaySettings.kt
  */
 @Serializable(with = AddictionSerializer::class)
 @SerialName("addiction")
@@ -42,6 +43,7 @@ data class Addiction(
     // not contain them keep working.
     val savingsMeta: LinkedHashMap<String, SavingMeta> = LinkedHashMap(),
     val relapseCosts: MutableList<RelapseCost> = mutableListOf(),
+    var display: DisplaySettings = DisplaySettings(),
 ) {
 
     /** How important this addiction is to the user. The order of the entries is the sort order. */

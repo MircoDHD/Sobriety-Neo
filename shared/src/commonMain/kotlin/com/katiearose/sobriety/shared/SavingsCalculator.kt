@@ -17,7 +17,9 @@ import kotlinx.serialization.Serializable
  *  - Addiction.savingsMeta:  name -> [SavingMeta] (category and how the user entered the rate).
  *                            Added by Sobriety Neo. Savings without an entry here are treated as
  *                            CUSTOM, entered per day (that is what the original app did).
- *  - Addiction.timeSaving:   time saved per day (hours:minutes).
+ *  - Addiction.timeSaving:   time saved per day (hours:minutes) from the original app. Sobriety Neo
+ *                            moves it into a TIME saving when the data is loaded
+ *                            ([migrateLegacyTimeSaving]); afterwards it is 00:00.
  *  - Addiction.relapseCosts: money and time spent during relapses ([RelapseCost]).
  *
  * Calculation:
@@ -35,8 +37,18 @@ enum class SavingCategory {
     MONEY,
 
     /** Anything else with a free unit, e.g. "cigarettes" or "drinks". */
-    CUSTOM
+    CUSTOM,
+
+    /**
+     * Time. The amount is in HOURS (unit "h"); it is added to the time saved and relapse time costs
+     * are subtracted. Replaces the separate "time saved per day" of the original app
+     * (see [migrateLegacyTimeSaving]).
+     */
+    TIME
 }
+
+/** Unit stored for [SavingCategory.TIME] savings. */
+const val TIME_SAVING_UNIT = "h"
 
 /** The period the user entered the amount for ("4.50 € per day", "20 € per week"). */
 @Serializable
@@ -113,6 +125,26 @@ val Addiction.primaryCurrency: String
     get() = savings.keys.firstOrNull { savingsMeta[it]?.category == SavingCategory.MONEY }
         ?.let { savings[it]?.second } ?: ""
 
+/**
+ * Moves the "time saved per day" of the original app into a saving of the TIME category, so that
+ * time is chosen like every other category. Does nothing if no time saving is set.
+ *
+ * @param name name for the new saving (localized "Time"); a number is added if it exists
+ * @return true if the addiction was changed and has to be saved
+ */
+fun Addiction.migrateLegacyTimeSaving(name: String): Boolean {
+    val minutes = timeSaving.hour * 60 + timeSaving.minute
+    if (minutes == 0) return false
+    var unique = name
+    var counter = 2
+    while (unique in savings) unique = "$name (${counter++})"
+    val hours = minutes / 60.0
+    savings[unique] = Pair(hours, TIME_SAVING_UNIT)
+    savingsMeta[unique] = SavingMeta(SavingCategory.TIME, RatePeriod.DAY, hours)
+    timeSaving = kotlinx.datetime.LocalTime(0, 0)
+    return true
+}
+
 /** True if at least one saving is in the MONEY category. */
 val Addiction.hasMoneySaving: Boolean
     get() = savings.keys.any { savingsMeta[it]?.category == SavingCategory.MONEY }
@@ -181,7 +213,9 @@ fun Addiction.calculateSavings(
         )
     }
 
-    val timePerDayMinutes = timeSaving.hour * 60 + timeSaving.minute
+    // Time: the legacy value (normally 0 after the migration) plus all TIME savings (hours/day).
+    val timePerDayMinutes = timeSaving.hour * 60 + timeSaving.minute +
+        items.filter { it.category == SavingCategory.TIME }.sumOf { savings[it.name]!!.first * 60.0 }
     val timeSet = timePerDayMinutes > 0
     return SavingsSummary(
         items = items,

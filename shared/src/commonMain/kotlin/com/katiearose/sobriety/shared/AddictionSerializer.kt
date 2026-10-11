@@ -27,7 +27,7 @@ import kotlinx.serialization.encoding.*
  * JSON keys (in the order of their element index):
  * `name, status, history, priority, daily_notes, time_saving, savings, milestones`, the
  * legacy keys `last_relapse, is_stopped`, and the keys added by Sobriety Neo:
- * `savings_meta, relapse_costs`.
+ * `savings_meta, relapse_costs, display`.
  *
  * Compatibility: the original Sobriety app ignores the Sobriety Neo keys when it imports a file
  * exported from Sobriety Neo, so that data is simply not shown there.
@@ -54,6 +54,7 @@ object AddictionSerializer : KSerializer<Addiction> {
             var milestones = LinkedHashSet<Pair<Int, DateTimeUnit>>()
             var savingsMeta = LinkedHashMap<String, SavingMeta>()
             var relapseCosts = mutableListOf<RelapseCost>()
+            var display = DisplaySettings()
             // Only set when the file was written by a very old version (see key 8 below).
             var legacyLastRelapse: Instant? = null
             while (true) {
@@ -87,6 +88,7 @@ object AddictionSerializer : KSerializer<Addiction> {
                     // Sobriety Neo keys
                     10 -> savingsMeta = LinkedHashMap(decodeSerializableElement(descriptor, i, savingsMetaSerializer))
                     11 -> relapseCosts = decodeSerializableElement(descriptor, i, relapseCostsSerializer).toMutableList()
+                    12 -> display = decodeSerializableElement(descriptor, i, DisplaySettings.serializer())
 
                     CompositeDecoder.DECODE_DONE -> break
                 }
@@ -102,7 +104,7 @@ object AddictionSerializer : KSerializer<Addiction> {
             }
 
             Addiction(name, status, history, priority, dailyNotes, timeSaving, savings, milestones,
-                savingsMeta, relapseCosts)
+                savingsMeta, relapseCosts, display)
         }
 
     override val descriptor: SerialDescriptor =
@@ -124,6 +126,7 @@ object AddictionSerializer : KSerializer<Addiction> {
             // Sobriety Neo keys (always written, read if present)
             element("savings_meta", savingsMetaSerializer.descriptor)
             element("relapse_costs", relapseCostsSerializer.descriptor)
+            element("display", DisplaySettings.serializer().descriptor)
         }
 
     override fun serialize(encoder: Encoder, value: Addiction) {
@@ -139,6 +142,7 @@ object AddictionSerializer : KSerializer<Addiction> {
             // 8 and 9 are the legacy keys, which are never written.
             encodeSerializableElement(descriptor, 10, savingsMetaSerializer, value.savingsMeta)
             encodeSerializableElement(descriptor, 11, relapseCostsSerializer, value.relapseCosts)
+            encodeSerializableElement(descriptor, 12, DisplaySettings.serializer(), value.display)
         }
     }
 }

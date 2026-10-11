@@ -10,7 +10,9 @@
       account backup (and restore it on a new phone). Because the data is sensitive, consider
       setting it to "false" and relying on the manual export in the settings instead.
     -->
+    <!-- android:name: SobrietyApp sets up the optional diagnostics log (Sobriety Neo). -->
     <application
+        android:name=".SobrietyApp"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/sobriety"

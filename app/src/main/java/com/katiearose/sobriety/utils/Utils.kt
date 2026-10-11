@@ -2,6 +2,7 @@ package com.katiearose.sobriety.utils
 
 import android.app.Activity
 import android.content.Context
+import android.os.SystemClock
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -219,5 +220,16 @@ inline var TextView.textResource: Int
     @Deprecated("This property is set-only, don't bother.", level = DeprecationLevel.HIDDEN)
     get() = error("don't")
 
-/** Saves all addictions of the app ([Main.addictions]) to disk. */
-fun CacheHandler.write() = writeCache(Main.addictions)
+/**
+ * Saves all addictions of the app ([Main.addictions]) to disk.
+ * The duration is recorded in the optional diagnostics log.
+ */
+fun CacheHandler.write() {
+    val start = SystemClock.elapsedRealtime()
+    writeCache(Main.addictions)
+    DiagnosticsLog.event(
+        "data_save",
+        "ms" to (SystemClock.elapsedRealtime() - start),
+        "trackers" to Main.addictions.size
+    )
+}

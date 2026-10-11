@@ -17,8 +17,8 @@ android {
         minSdk = 21
         targetSdk = 33
         // Increase versionCode with every release, otherwise Android refuses to update the app.
-        versionCode = 23
-        versionName = "v10.1.0-neo.1"
+        versionCode = 24
+        versionName = "v10.2.0-neo.1-preview"
         setProperty("archivesBaseName", "Sobriety-Neo-$versionName")
     }
 

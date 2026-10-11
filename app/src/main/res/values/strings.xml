@@ -145,4 +145,61 @@
     <string name="error_invalid_amount">Enter a valid number, for example 4.50</string>
     <string name="error_amount_too_large">Number is too large (maximum %d)</string>
     <string name="error_invalid_attempts_window">Enter a whole number from 0 to %d</string>
+    <!-- ===== Sobriety Neo: savings with categories and totals ===== -->
+    <string name="info">Info</string>
+    <string name="saving_category">Category</string>
+    <string name="saving_category_money">Money</string>
+    <string name="saving_category_other">Other</string>
+    <string name="saving_period">Per</string>
+    <string name="rate_day">per day</string>
+    <string name="rate_week">per week</string>
+    <string name="rate_month">per month</string>
+    <string name="amount_saved_short">Amount</string>
+    <string name="saving_currency_hint">Currency, e.g. € or $</string>
+    <string name="saving_unit_hint">Unit, e.g. cigarettes</string>
+    <!-- "20.00 € per week · Money" -->
+    <string name="saving_rate_line">%1$s %2$s · %3$s</string>
+    <string name="savings_totals">Total saved</string>
+    <string name="savings_totals_empty">Nothing to calculate yet. Add a saving below or set the time saved per day.</string>
+    <!-- "Money: 123.40 € (this month: 45.10 €)" -->
+    <string name="savings_total_line">%1$s: %2$s (this month: %3$s)</string>
+    <string name="savings_spent_money_line">Spent during relapses: %1$s (this month: %2$s)</string>
+    <string name="savings_spent_time_line">Time spent during relapses: %1$s (this month: %2$s)</string>
+    <string name="card_savings_money">💰 %1$s saved · %2$s this month</string>
+    <string name="card_savings_time">⏱ %1$s saved · %2$s this month</string>
+    <string name="duration_days_hours">%1$d d %2$d h</string>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- ===== Sobriety Neo: relapse dialog ===== -->
+    <string name="relapse_costs_optional">Optional: what did it cost?</string>
+    <string name="relapse_money_spent">Money spent</string>
+    <string name="relapse_money_spent_with_currency">Money spent (%s)</string>
+    <string name="relapse_hours_spent">Hours spent</string>
+    <string name="relapse_minutes_spent">Minutes spent</string>
+    <string name="relapse_log_button">Log relapse</string>
+
+    <!-- ===== Sobriety Neo: diagnostics ===== -->
+    <string name="diagnostics">Diagnostics</string>
+    <string name="diagnostics_enabled">Collect diagnostic logs</string>
+    <string name="diagnostics_enabled_summary">Off by default. Records anonymous performance data and crashes on this device only. Nothing is sent anywhere.</string>
+    <string name="diagnostics_what">What is collected?</string>
+    <string name="diagnostics_export">Export diagnostic logs</string>
+    <string name="diagnostics_delete">Delete diagnostic logs</string>
+    <string name="diagnostics_size">Current size: %d KB</string>
+    <string name="diagnostics_delete_confirm">Delete all recorded diagnostics?</string>
+    <string name="diagnostics_exported">Diagnostics exported</string>
+    <string name="diagnostics_export_failed">Could not export the diagnostics</string>
+
+    <!-- ===== Sobriety Neo: explanations behind the "i" buttons ===== -->
+    <string name="info_main">Each card is one thing you want to stay away from.\n\n• The counter shows how long it has been since your last relapse. It is calculated from the saved time, so nothing runs in the background.\n• Tap the card for a detailed summary with progress bars.\n• Tap the priority to change it. Cards are sorted by priority.\n• ↺ logs a relapse (or starts tracking again).\n• ■ stops tracking. The time stays saved.\n• Timeline shows all attempts.\n• … opens daily notes, savings and milestones.\n• 🗑 deletes the entry for good.\n\nIf you set up savings, the money and time you saved appear on the card.</string>
+    <string name="info_relapse">Logging a relapse ends the current attempt and starts a new one right now. Your history is kept in the timeline.\n\nMoney and time spent are optional. If you enter them, they are subtracted from your savings, so the totals stay honest. Leave the fields empty if you do not want to track this.</string>
+    <string name="info_add_saving">Enter what you save by not doing it.\n\n• Money: the amount and its currency. All money savings are added up and shown on the main screen, for this month and in total.\n• Other: anything you can count, for example cigarettes or drinks.\n\n\"Per\" tells the app whether the amount is per day, per week or per month. The app converts it to a daily value and multiplies it by the time you stayed clean.</string>
+    <string name="info_savings">Here you see what staying clean has given you so far.\n\nThe totals are calculated like this: amount per day × the time you stayed clean, in all attempts together. Money and time you entered when logging a relapse are subtracted.\n\n\"This month\" only counts the current calendar month.\n\n• Time: how much time per day you used to spend on it.\n• Other savings: money and everything else, with a category and a period.</string>
+    <string name="info_timeline">The timeline lists every attempt: when it started, when it ended and how long it lasted.\n\nThe hourglass button calculates the average length of the attempts you choose.</string>
+    <string name="info_milestones">Milestones are goals such as \"7 days\" or \"3 months\". The bar shows how close you are, and the date shows when you will reach it.\n\nMonths and years follow the calendar, exactly like the counter.</string>
+    <string name="info_daily_notes">Write down how a day went, what helped or what was difficult. There is one note per day.\n\nIf enabled in the settings, the app offers to write a note after a relapse.</string>
+    <string name="info_summary">The summary shows your current attempt with a progress bar for each unit of time.\n\nEach bar shows how far you are into the next unit, for example how much of the current day or month has passed.</string>
+    <string name="info_create">Give the entry a name and choose when you stopped. You can choose a date in the past, or in the future if you want to start later.\n\nThe priority decides the order of the cards on the main screen.</string>
+    <string name="info_settings">• Appearance: theme and Material You colors.\n• General: date format, the note after a relapse, and how many past attempts are used for the average.\n• Data: export everything to a file or import a file, for example from the original Sobriety app.\n• Diagnostics: an optional, anonymous log that helps to find problems.</string>
+    <string name="info_diagnostics">When turned on, the app records anonymous technical data on this device:\n\n• how long the app and each screen take to start\n• how long loading and saving takes, and how many entries there are\n• whether the counter updates run smoothly\n• crashes (error type and code location only)\n\nNever recorded: names of your entries, notes, amounts, dates of relapses, or anything that identifies you or your phone.\n\nThe log stays on your phone (max. 256 KB). It only leaves the phone if you export it and send it to someone yourself.</string>
 </resources>

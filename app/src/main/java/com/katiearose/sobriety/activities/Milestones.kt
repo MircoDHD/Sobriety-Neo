@@ -1,5 +1,6 @@
 package com.katiearose.sobriety.activities
 
+import com.katiearose.sobriety.utils.handleInfoMenuItem
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -108,4 +109,13 @@ class Milestones : AppCompatActivity() {
         cacheHandler.write()
         adapter.update()
     }
+
+    // "i" button in the top bar (Sobriety Neo), see utils/InfoUtils.kt.
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_info, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        handleInfoMenuItem(item.itemId, R.string.milestones, R.string.info_milestones) || super.onOptionsItemSelected(item)
 }

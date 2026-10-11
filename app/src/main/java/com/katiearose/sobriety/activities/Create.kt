@@ -1,5 +1,6 @@
 package com.katiearose.sobriety.activities
 
+import com.katiearose.sobriety.utils.handleInfoMenuItem
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -154,4 +155,13 @@ class Create : AppCompatActivity() {
             putInt("current_priority", priority.ordinal)
         }
     }
+
+    // "i" button in the top bar (Sobriety Neo), see utils/InfoUtils.kt.
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_info, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        handleInfoMenuItem(item.itemId, R.string.add_new_addiction, R.string.info_create) || super.onOptionsItemSelected(item)
 }

@@ -16,6 +16,10 @@ import com.katiearose.sobriety.shared.Addiction
 import com.katiearose.sobriety.shared.CacheHandler
 import com.katiearose.sobriety.utils.MAX_AVERAGE_ATTEMPTS_WINDOW
 import com.katiearose.sobriety.utils.applyThemes
+import com.katiearose.sobriety.utils.DiagnosticsLog
+import com.katiearose.sobriety.utils.handleInfoMenuItem
+import com.katiearose.sobriety.utils.showInfo
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.DateTimeFormatter
@@ -38,6 +42,15 @@ class Settings : AppCompatActivity() {
                 .commit()
         }
     }
+
+    // "i" button in the top bar (Sobriety Neo), see utils/InfoUtils.kt.
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_info, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        handleInfoMenuItem(item.itemId, R.string.settings, R.string.info_settings) || super.onOptionsItemSelected(item)
 
     class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -120,12 +133,59 @@ class Settings : AppCompatActivity() {
                 true
             }
 
+            setUpDiagnostics()
+
             findPreference<Preference>("pref_app_version")?.summary = BuildConfig.VERSION_NAME
 
             findPreference<Preference>("pref_app_issue_tracker")?.setOnPreferenceClickListener {
                 val i = Intent(Intent.ACTION_VIEW)
                 i.data = Uri.parse(requireContext().getString(R.string.app_issue_url))
                 startActivity(i)
+                true
+            }
+        }
+
+        /**
+         * Sobriety Neo: the "Diagnostics" section (optional, anonymous log, see [DiagnosticsLog]).
+         * Export writes the log to a file chosen by the user, so it can be sent to the developer.
+         */
+        private fun setUpDiagnostics() {
+            val exportPref = findPreference<Preference>("diagnostics_export")
+            val deletePref = findPreference<Preference>("diagnostics_delete")
+            fun updateSize() {
+                val kb = (DiagnosticsLog.sizeBytes(requireContext()) + 1023) / 1024
+                deletePref?.summary = getString(R.string.diagnostics_size, kb)
+            }
+            updateSize()
+
+            findPreference<Preference>("diagnostics_info")?.setOnPreferenceClickListener {
+                requireContext().showInfo(R.string.diagnostics_what, R.string.info_diagnostics)
+                true
+            }
+            val getDiagnosticsExport = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri: Uri? ->
+                if (uri != null) {
+                    val ok = DiagnosticsLog.export(requireContext(), uri)
+                    Toast.makeText(
+                        requireContext(),
+                        if (ok) R.string.diagnostics_exported else R.string.diagnostics_export_failed,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            exportPref?.setOnPreferenceClickListener {
+                getDiagnosticsExport.launch("sobriety_neo_diagnostics.txt")
+                true
+            }
+            deletePref?.setOnPreferenceClickListener {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.diagnostics_delete)
+                    .setMessage(R.string.diagnostics_delete_confirm)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.delete) { _, _ ->
+                        DiagnosticsLog.clear(requireContext())
+                        updateSize()
+                    }
+                    .show()
                 true
             }
         }

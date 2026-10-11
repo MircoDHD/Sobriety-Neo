@@ -19,6 +19,8 @@ import kotlinx.serialization.Serializable
  * @property timeSaving time that is saved per day by not doing the addiction (00:00 = not set)
  * @property savings other things that are saved per day: name -> (amount per day, unit)
  * @property milestones goals such as "7 days" or "3 months"
+ * @property savingsMeta (Sobriety Neo) category and entered rate of each saving, see SavingsCalculator.kt
+ * @property relapseCosts (Sobriety Neo) money and time spent during relapses, see SavingsCalculator.kt
  */
 @Serializable(with = AddictionSerializer::class)
 @SerialName("addiction")
@@ -36,6 +38,10 @@ data class Addiction(
     // What is being saved -> Pair(amount, unit)
     val savings: LinkedHashMap<String, Pair<Double, String>>,
     val milestones: LinkedHashSet<Pair<Int, DateTimeUnit>>,
+    // Added by Sobriety Neo. They have default values so that older code paths and files that do
+    // not contain them keep working.
+    val savingsMeta: LinkedHashMap<String, SavingMeta> = LinkedHashMap(),
+    val relapseCosts: MutableList<RelapseCost> = mutableListOf(),
 ) {
 
     /** How important this addiction is to the user. The order of the entries is the sort order. */
@@ -167,8 +173,16 @@ data class Addiction(
      * Records a relapse: closes the running attempt and immediately starts a new one.
      * Also used to start tracking again after [stopAbstaining] or to start a waiting
      * ([Status.Future]) addiction early.
+     *
+     * @param cost optional money / time spent during this relapse. It is stored in
+     *   [relapseCosts] (with the current time) and later subtracted from the savings.
      */
-    fun relapse() {
+    fun relapse(cost: RelapseCost? = null) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        // Only a real relapse (of a running attempt) can cost something.
+        if (status == Status.Ongoing && cost != null && (cost.money > 0.0 || cost.minutes > 0L)) {
+            relapseCosts.add(cost.copy(timeMillis = now))
+        }
         when (status) {
             // End the current attempt
             Status.Ongoing -> history.putLast(Clock.System.now().toEpochMilliseconds())

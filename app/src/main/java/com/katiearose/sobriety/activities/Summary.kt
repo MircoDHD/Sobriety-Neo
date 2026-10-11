@@ -1,5 +1,6 @@
 package com.katiearose.sobriety.activities
 
+import com.katiearose.sobriety.utils.handleInfoMenuItem
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -65,4 +66,13 @@ class Summary : AppCompatActivity() {
         tickHandler.removeCallbacks(tick)
         super.onPause()
     }
+
+    // "i" button in the top bar (Sobriety Neo), see utils/InfoUtils.kt.
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_info, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        handleInfoMenuItem(item.itemId, R.string.summary, R.string.info_summary) || super.onOptionsItemSelected(item)
 }

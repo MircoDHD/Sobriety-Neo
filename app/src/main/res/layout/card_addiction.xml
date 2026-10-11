@@ -61,6 +61,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewTime" />
 
+        <!-- Sobriety Neo: money / time saved (total and this month). Hidden if no saving is set. -->
+        <TextView
+            android:id="@+id/textViewSavings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            tools:text="💰 123.40 € saved · 45.10 € this month"
+            android:visibility="gone"
+            android:textColor="?attr/colorTextOnCard"
+            android:textSize="@dimen/text_size_small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewAverage" />
         <ImageView
             android:id="@+id/imageDelete"
             android:layout_width="48dp"
@@ -73,7 +87,7 @@
             app:tint="?attr/colorIconOnCard"
             android:src="@drawable/ic_baseline_delete_24"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewAverage" />
+            app:layout_constraintTop_toBottomOf="@id/textViewSavings" />
 
         <ImageView
             android:id="@+id/imageMisc"
@@ -87,7 +101,7 @@
             app:tint="?attr/colorIconOnCard"
             android:src="@drawable/more_horiz_24px"
             app:layout_constraintStart_toEndOf="@id/imageDelete"
-            app:layout_constraintTop_toBottomOf="@id/textViewAverage" />
+            app:layout_constraintTop_toBottomOf="@id/textViewSavings" />
 
         <ImageView
             android:id="@+id/imageReset"

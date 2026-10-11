@@ -10,11 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.katiearose.sobriety.activities.Main
 import com.katiearose.sobriety.databinding.CardAddictionBinding
 import com.katiearose.sobriety.shared.Addiction
+import com.katiearose.sobriety.shared.calculateSavings
 import com.katiearose.sobriety.utils.convertRangeToString
 import com.katiearose.sobriety.utils.convertSecondsToString
 import com.katiearose.sobriety.utils.getDateFormatPattern
 import com.katiearose.sobriety.utils.getAverageAttemptsWindow
 import com.katiearose.sobriety.utils.getSharedPref
+import com.katiearose.sobriety.utils.savingsCardText
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -159,8 +161,19 @@ class AddictionCardAdapter(
             return dateFormat.format(date)
         }
 
+        /**
+         * Sobriety Neo: money and time saved, below the counter. It is recalculated with every
+         * tick; the calculation only adds up a few numbers, so this is cheap.
+         */
+        private fun displaySavings() {
+            val text = binding.root.context.savingsCardText(addiction.calculateSavings())
+            binding.textViewSavings.visibility = if (text == null) View.GONE else View.VISIBLE
+            binding.textViewSavings.text = text
+        }
+
         /** Sets the big counter text, which depends on the status of the addiction. */
         private fun displayInfo() {
+            displaySavings()
             binding.textViewTime.text = when (addiction.status) {
                 // Running: time since the last relapse.
                 Addiction.Status.Ongoing -> binding.root.context.convertRangeToString(addiction.history.keys.last())

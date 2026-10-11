@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- "i": explains this screen (Sobriety Neo) -->
+    <item
+        android:id="@+id/info"
+        android:title="@string/info"
+        android:icon="@drawable/info_24px"
+        app:showAsAction="ifRoom"/>
+
     <item
         android:id="@+id/calc_avg_duration"
         android:title="@string/calc_avg_durations"

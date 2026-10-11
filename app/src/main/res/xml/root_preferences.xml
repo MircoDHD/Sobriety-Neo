@@ -109,6 +109,37 @@
 
     </PreferenceCategory>
 
+    <!-- Sobriety Neo: optional, anonymous diagnostics log (see utils/DiagnosticsLog.kt). -->
+    <PreferenceCategory app:title="@string/diagnostics"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="diagnostics_enabled"
+            app:title="@string/diagnostics_enabled"
+            app:summary="@string/diagnostics_enabled_summary"
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:key="diagnostics_info"
+            app:persistent="false"
+            app:title="@string/diagnostics_what"
+            app:icon="@drawable/info_24px" />
+
+        <Preference
+            app:key="diagnostics_export"
+            app:persistent="false"
+            app:title="@string/diagnostics_export"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="diagnostics_delete"
+            app:persistent="false"
+            app:title="@string/diagnostics_delete"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/about"
         app:iconSpaceReserved="false">
 

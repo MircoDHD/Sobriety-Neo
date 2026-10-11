@@ -1,5 +1,6 @@
 package com.katiearose.sobriety.activities
 
+import com.katiearose.sobriety.utils.handleInfoMenuItem
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -111,4 +112,13 @@ class DailyNotes : AppCompatActivity() {
         cacheHandler.write()
         adapter.update()
     }
+
+    // "i" button in the top bar (Sobriety Neo), see utils/InfoUtils.kt.
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_info, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
+        handleInfoMenuItem(item.itemId, R.string.daily_notes, R.string.info_daily_notes) || super.onOptionsItemSelected(item)
 }

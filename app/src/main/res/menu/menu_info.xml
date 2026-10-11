@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The "i" button in the top bar of a screen. Opens an explanation (see utils/InfoUtils.kt). -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/info"
+        android:title="@string/info"
+        android:icon="@drawable/info_24px"
+        app:showAsAction="always"/>
+
+</menu>

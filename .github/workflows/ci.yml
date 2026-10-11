@@ -3,8 +3,9 @@
 # What happens on every push:
 #   1. the unit tests of the shared module run (time calculation, data model),
 #   2. a debug APK is built,
-#   3. the APK is attached to the workflow run (artifact) AND published as a "pre-release" on the
-#      Releases page of the repository, so it can be downloaded directly on a phone.
+#   3. the APK is attached to the workflow run (artifact). For pushes to master (and builds started
+#      by hand) it is also published as a "pre-release" on the Releases page, so it can be
+#      downloaded directly on a phone.
 #
 # To install a build: open the repository on GitHub -> Releases -> newest entry -> tap the .apk file.
 name: Android CI
@@ -86,9 +87,11 @@ jobs:
         name: Sobriety-Neo-debug-apk
         path: app/build/outputs/apk/debug/*.apk
 
-    # Publishes the APK on the Releases page. Not done for pull requests (they have no write access).
+    # Publishes the APK on the Releases page, for pushes to master and for builds started by hand
+    # ("Run workflow" in the Actions tab, which also works for other branches). Pushes to other
+    # branches only keep the APK as a workflow artifact, so the Releases page is not flooded.
     - name: Publish pre-release with the APK
-      if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'workflow_dispatch'
       uses: softprops/action-gh-release@v2
       with:
         tag_name: build-${{ github.run_number }}

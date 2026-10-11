@@ -1,115 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  Savings screen of one addiction.
+  Top: the calculated totals (Sobriety Neo). Below: the time saved per day and the list of other
+  savings (money, cigarettes, ...), as in the original app.
+  The whole screen scrolls; the list inside does not scroll on its own (nestedScrollingEnabled).
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.Savings"
     tools:ignore="UnusedAttribute">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="6dp"
-        android:text="@string/time"
-        android:gravity="center_vertical"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:ignore="RelativeOverlap" />
-
-    <ImageView
-        android:id="@+id/btn_expand_collapse_time"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple"
-        android:src="@drawable/expand_less_24px"
-        android:contentDescription="@string/collapse"
-        android:tooltipText="@string/collapse" />
-
-    <ImageView
-        android:id="@+id/btn_edit_time"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:layout_toStartOf="@id/btn_expand_collapse_time"
-        android:background="@drawable/ripple"
-        android:src="@drawable/edit_note_24px"
-        android:contentDescription="@string/collapse"
-        android:tooltipText="@string/collapse" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/time_saved_card"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btn_expand_collapse_time"
-        android:layout_margin="6dp"
-        app:contentPadding="6dp">
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
 
+        <!-- Totals -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="6dp"
+            android:text="@string/savings_totals"
+            android:gravity="center_vertical"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/totals_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            app:contentPadding="10dp">
+
+            <TextView
+                android:id="@+id/totals_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4dp"
+                tools:text="Money: 123.40 € (this month 45.10 €)" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Time saved per day -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="48dp"
+            android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/time_saved_per_day"/>
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/time"
+                android:gravity="center_vertical"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/time_saved"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:gravity="center"/>
+            <ImageView
+                android:id="@+id/btn_edit_time"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@drawable/ripple"
+                android:src="@drawable/edit_note_24px"
+                android:contentDescription="@string/edit"
+                android:tooltipText="@string/edit" />
 
+            <ImageView
+                android:id="@+id/btn_expand_collapse_time"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@drawable/ripple"
+                android:src="@drawable/expand_less_24px"
+                android:contentDescription="@string/collapse"
+                android:tooltipText="@string/collapse" />
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/time_saved_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            app:contentPadding="6dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="6dp"
-        android:layout_below="@id/time_saved_card"
-        android:text="@string/other_savings"
-        android:gravity="center_vertical"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:ignore="RelativeOverlap" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/btn_expand_collapse_other"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:layout_below="@id/time_saved_card"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple"
-        android:src="@drawable/expand_less_24px"
-        android:contentDescription="@string/collapse"
-        android:tooltipText="@string/collapse" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/time_saved_per_day"/>
 
-    <ImageView
-        android:id="@+id/btn_add_other"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:layout_below="@id/time_saved_card"
-        android:layout_toStartOf="@id/btn_expand_collapse_other"
-        android:background="@drawable/ripple"
-        android:src="@drawable/add_24px"
-        android:contentDescription="@string/add_new_saving"
-        android:tooltipText="@string/add_new_saving" />
+                <TextView
+                    android:id="@+id/time_saved"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:gravity="center"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/other_savings_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btn_expand_collapse_other"/>
+        <!-- Other savings -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal">
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/other_savings"
+                android:gravity="center_vertical"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/btn_add_other"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@drawable/ripple"
+                android:src="@drawable/add_24px"
+                android:contentDescription="@string/add_new_saving"
+                android:tooltipText="@string/add_new_saving" />
+
+            <ImageView
+                android:id="@+id/btn_expand_collapse_other"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@drawable/ripple"
+                android:src="@drawable/expand_less_24px"
+                android:contentDescription="@string/collapse"
+                android:tooltipText="@string/collapse" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/other_savings_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

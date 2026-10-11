@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.katiearose.sobriety.databinding.ListItemSavingBinding
 import com.katiearose.sobriety.shared.Addiction
+import com.katiearose.sobriety.shared.RatePeriod
+import com.katiearose.sobriety.shared.SavingCategory
+import com.katiearose.sobriety.utils.formatAmount
 
 /**
  * List of the "other savings" of one addiction (name and amount saved per day), with buttons to
@@ -31,8 +34,12 @@ class SavingsAdapter(private val addiction: Addiction, private val context: Cont
     }) {
     init { update() }
 
-    /** Redraws the list from [Addiction.savings]. */
-    fun update() = submitList(addiction.savings.toList())
+    /**
+     * Redraws the list from [Addiction.savings]. notifyDataSetChanged is needed in addition,
+     * because a changed category or period is not part of the compared list items.
+     */
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    fun update() = submitList(addiction.savings.toList()) { notifyDataSetChanged() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SavingsViewHolder {
         val binding = ListItemSavingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -44,7 +51,15 @@ class SavingsAdapter(private val addiction: Addiction, private val context: Cont
     override fun onBindViewHolder(holder: SavingsViewHolder, position: Int) {
         val pair = currentList[position]
         holder.savingName.text = pair.first
-        holder.savingsAmountPerDay.text = context.getString(R.string.other_saved_per_day, pair.second.first, pair.second.second)
+        // Sobriety Neo: show the amount the way it was entered ("20.00 € per week · Money").
+        val meta = addiction.savingsMeta[pair.first]
+        val period = meta?.period ?: RatePeriod.DAY
+        val amount = meta?.enteredAmount ?: pair.second.first
+        val periodText = context.resources.getStringArray(R.array.rate_periods)[period.ordinal]
+        val categoryText = context.resources.getStringArray(R.array.saving_categories)[(meta?.category ?: SavingCategory.CUSTOM).ordinal]
+        holder.savingsAmountPerDay.text = context.getString(
+            R.string.saving_rate_line, formatAmount(amount, pair.second.second), periodText, categoryText
+        )
     }
 
     class SavingsViewHolder(binding: ListItemSavingBinding, editButtonAction: (Int) -> Unit,

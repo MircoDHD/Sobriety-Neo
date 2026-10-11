@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import com.katiearose.sobriety.utils.handleInfoMenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -71,6 +72,7 @@ class Timeline : AppCompatActivity() {
         }
 
         val id = item.itemId
+        if (handleInfoMenuItem(id, R.string.timeline, R.string.info_timeline)) return true
         if (id == R.id.calc_avg_duration) {
             // At least two finished attempts are needed to calculate an average.
             if (addiction.history.size == 1 || (addiction.history.size == 2 && addiction.history.values.last() == 0L)) {

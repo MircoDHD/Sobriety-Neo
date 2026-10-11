@@ -20,18 +20,25 @@ import kotlinx.serialization.encoding.*
  * versions of the app can still be read. **Every user's data is stored with this format**, so be
  * very careful when changing it:
  *  - never change the position or name of an existing element in [descriptor],
- *  - only append new elements at the END of the "current keys" block, before the legacy keys,
+ *  - only append new elements at the END of [descriptor] (the index is only used in this file,
+ *    the JSON file contains the key names),
  *  - the reader ignores unknown keys, so new fields do not break old files.
  *
  * JSON keys (in the order of their element index):
- * `name, status, history, priority, daily_notes, time_saving, savings, milestones` and the
- * legacy keys `last_relapse, is_stopped`.
+ * `name, status, history, priority, daily_notes, time_saving, savings, milestones`, the
+ * legacy keys `last_relapse, is_stopped`, and the keys added by Sobriety Neo:
+ * `savings_meta, relapse_costs`.
+ *
+ * Compatibility: the original Sobriety app ignores the Sobriety Neo keys when it imports a file
+ * exported from Sobriety Neo, so that data is simply not shown there.
  */
 object AddictionSerializer : KSerializer<Addiction> {
     private val historySerializer = MapSerializer(Long.serializer(), Long.serializer())
     private val dailyNotesSerializer = MapSerializer(LocalDateIso8601Serializer, String.serializer())
     private val savingsSerializer = MapSerializer(String.serializer(), PairSerializer(Double.serializer(), String.serializer()))
     private val milestonesSerializer = SetSerializer(PairSerializer(Int.serializer(), DateTimeUnitSerializer))
+    private val savingsMetaSerializer = MapSerializer(String.serializer(), SavingMeta.serializer())
+    private val relapseCostsSerializer = ListSerializer(RelapseCost.serializer())
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): Addiction =
@@ -45,6 +52,8 @@ object AddictionSerializer : KSerializer<Addiction> {
             var timeSaving = LocalTime(0, 0)
             var savings = LinkedHashMap<String, Pair<Double, String>>()
             var milestones = LinkedHashSet<Pair<Int, DateTimeUnit>>()
+            var savingsMeta = LinkedHashMap<String, SavingMeta>()
+            var relapseCosts = mutableListOf<RelapseCost>()
             // Only set when the file was written by a very old version (see key 8 below).
             var legacyLastRelapse: Instant? = null
             while (true) {
@@ -75,6 +84,10 @@ object AddictionSerializer : KSerializer<Addiction> {
                     // is_stopped
                     9 -> if (decodeBooleanElement(descriptor, i)) status = Addiction.Status.Stopped
 
+                    // Sobriety Neo keys
+                    10 -> savingsMeta = LinkedHashMap(decodeSerializableElement(descriptor, i, savingsMetaSerializer))
+                    11 -> relapseCosts = decodeSerializableElement(descriptor, i, relapseCostsSerializer).toMutableList()
+
                     CompositeDecoder.DECODE_DONE -> break
                 }
             }
@@ -88,7 +101,8 @@ object AddictionSerializer : KSerializer<Addiction> {
                 history[start] = if (status == Addiction.Status.Stopped) start else 0
             }
 
-            Addiction(name, status, history, priority, dailyNotes, timeSaving, savings, milestones)
+            Addiction(name, status, history, priority, dailyNotes, timeSaving, savings, milestones,
+                savingsMeta, relapseCosts)
         }
 
     override val descriptor: SerialDescriptor =
@@ -106,6 +120,10 @@ object AddictionSerializer : KSerializer<Addiction> {
             // They are only read, never written (see serialize below).
             element<Instant>("last_relapse")
             element<Boolean>("is_stopped")
+
+            // Sobriety Neo keys (always written, read if present)
+            element("savings_meta", savingsMetaSerializer.descriptor)
+            element("relapse_costs", relapseCostsSerializer.descriptor)
         }
 
     override fun serialize(encoder: Encoder, value: Addiction) {
@@ -118,6 +136,9 @@ object AddictionSerializer : KSerializer<Addiction> {
             encodeSerializableElement(descriptor, 5, LocalTimeIso8601Serializer, value.timeSaving)
             encodeSerializableElement(descriptor, 6, savingsSerializer, value.savings)
             encodeSerializableElement(descriptor, 7, milestonesSerializer, value.milestones)
+            // 8 and 9 are the legacy keys, which are never written.
+            encodeSerializableElement(descriptor, 10, savingsMetaSerializer, value.savingsMeta)
+            encodeSerializableElement(descriptor, 11, relapseCostsSerializer, value.relapseCosts)
         }
     }
 }

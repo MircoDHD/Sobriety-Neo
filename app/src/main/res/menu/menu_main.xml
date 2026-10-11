@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.katiearose.sobriety.activities.Main">
 
+    <!-- "i": explains this screen (Sobriety Neo) -->
+    <item
+        android:id="@+id/info"
+        android:title="@string/info"
+        android:icon="@drawable/info_24px"
+        app:showAsAction="ifRoom"/>
+
     <item
         android:id="@+id/go_to_settings"
         android:title="@string/settings"

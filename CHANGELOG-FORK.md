@@ -4,6 +4,29 @@ This file lists what differs from the upstream project
 ([seaglade/Sobriety](https://github.com/seaglade/Sobriety), last upstream commit `ad94ed6`).
 Newest entries first.
 
+## v10.2.0-neo.1-preview - savings, explanations, diagnostics
+
+### Added
+- **Savings categories and totals** (`shared/.../SavingsCalculator.kt`). Each saving has a category
+  (money / other) and a period (per day / week / month). Totals are calculated as
+  `amount per day × sober time of all attempts − relapse costs`, in total and for the current
+  calendar month. Money and time saved are shown on the cards of the main screen and as a totals
+  card on the Savings screen.
+- **Relapse costs.** Logging a relapse opens a bottom sheet with optional fields for money and time
+  spent. They are stored in `Addiction.relapseCosts` and subtracted from the savings.
+- **Info buttons (ⓘ)** in the top bar of every screen and in the relapse and saving dialogs
+  (`utils/InfoUtils.kt`, texts `info_*` in `strings.xml`).
+- **Optional diagnostics log** (`utils/DiagnosticsLog.kt`, `SobrietyApp.kt`). Off by default,
+  anonymous, stored on the device only, exportable from the settings.
+- Unit tests for the savings calculation and for storing the new fields.
+
+### Changed
+- Data format: two new keys `savings_meta` and `relapse_costs`. Files from older versions load
+  unchanged; the original app ignores the new keys.
+- The time picker for "time saved per day" opens at the current value.
+- CI: publishes a release only for pushes to `master` or builds started by hand; shows compiler
+  errors and failed tests as annotations on the run page.
+
 ## v10.1.0-neo.1 - bug fixes and code comments
 
 ### Fixed

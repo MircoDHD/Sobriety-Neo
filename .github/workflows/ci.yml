@@ -47,8 +47,12 @@ jobs:
       run: chmod +x gradlew
 
     # Fails the build (and therefore the release) if the time calculation or the data model break.
+    # The output is also written to gradle-*.log, so that errors can be shown as annotations
+    # (see "Show build errors" below).
     - name: Run unit tests
-      run: ./gradlew :shared:testDebugUnitTest --stacktrace
+      run: |
+        set -o pipefail
+        ./gradlew :shared:testDebugUnitTest --stacktrace 2>&1 | tee gradle-test.log
 
     # Counts the executed tests and shows the result as a note on the run page. Fails if no test ran
     # at all, so a misconfigured test setup can not go unnoticed.
@@ -63,6 +67,10 @@ jobs:
             tests += int(r.get("tests", 0))
             failures += int(r.get("failures", 0)) + int(r.get("errors", 0))
             skipped += int(r.get("skipped", 0))
+            for case in r.iter("testcase"):
+                for bad in list(case.iter("failure")) + list(case.iter("error")):
+                    text = (bad.get("message") or "").replace("%", "%25").replace("\n", "%0A")[:400]
+                    print(f"::error title=Test failed::{case.get('classname')}.{case.get('name')}: {text}")
         msg = f"{tests} tests, {failures} failed, {skipped} skipped"
         print(f"::notice title=Unit tests::{msg}")
         with open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a") as s:
@@ -71,7 +79,21 @@ jobs:
         PY
 
     - name: Build debug APK
-      run: ./gradlew :app:assembleDebug --stacktrace
+      run: |
+        set -o pipefail
+        ./gradlew :app:assembleDebug --stacktrace 2>&1 | tee gradle-build.log
+
+    # On failure: copies the compiler / resource errors into one annotation on the run page, so
+    # they can be read without downloading the full log.
+    - name: Show build errors
+      if: failure()
+      run: |
+        cat gradle-*.log 2>/dev/null \
+          | grep -E "^e: |error:|ERROR:|What went wrong|AAPT: error|FAILED|> " \
+          | grep -v "^> Task" | head -40 > errors.txt || true
+        if [ -s errors.txt ]; then
+          echo "::error title=Build errors::$(sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g' errors.txt)"
+        fi
 
     # Keep the test report when something fails, to find out why.
     - name: Upload test report

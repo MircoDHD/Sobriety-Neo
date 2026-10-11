@@ -7,8 +7,8 @@ since your last relapse down to the second, your average time between relapses, 
 daily notes and a timeline. All data stays on your device. There are no ads, no trackers, no accounts
 and no subscriptions.
 
-Sobriety Neo is a community fork of **[Sobriety](https://github.com/seaglade/Sobriety)** by Katie Rose
-and its contributors. The original app is a wonderful piece of work and the foundation of everything
+Sobriety Neo is a community fork of **[Sobriety](https://github.com/seaglade/Sobriety)** by
+[seaglade](https://github.com/seaglade) and its contributors. The original app is a wonderful piece of work and the foundation of everything
 here. Its last release (v10.0.0) was published in January 2023 and the repository has not been updated
 since the end of 2024. This fork continues where it left off: it fixes bugs, documents the code and adds
 new features step by step.
@@ -22,7 +22,9 @@ new features step by step.
 
 - [Download and install](#download-and-install)
 - [Moving your data from the original app](#moving-your-data-from-the-original-app)
+- [What's new](#whats-new)
 - [What has been fixed](#what-has-been-fixed)
+- [Diagnostics (optional)](#diagnostics-optional)
 - [Roadmap](#roadmap)
 - [How this project is made](#how-this-project-is-made)
 - [Disclaimer](#disclaimer)
@@ -50,6 +52,22 @@ Sobriety app and does not replace or touch it.
 
 Your entries are added to Sobriety Neo. If an entry with the same name already exists, the imported
 one is renamed, for example "Smoking (2)", so nothing is overwritten.
+
+---
+
+## What's new
+
+**v10.2.0 (preview)**
+- **Savings that add up.** Every saving now has a category (money or other) and a period (per day,
+  week or month). The app calculates what you have saved, in total and in the current month.
+  Money and time saved are shown directly on the main screen next to the counter.
+- **Honest totals after a relapse.** When you log a relapse you can optionally enter how much money
+  and time you spent. Both are subtracted from your savings.
+- **Explanations everywhere.** Every screen has an ⓘ button that explains what it does.
+- **Optional diagnostics.** An anonymous log that helps to find problems, off by default
+  (see [below](#diagnostics-optional)).
+- **No background activity.** The counters are calculated from the saved times. The app only
+  updates the display while it is open and does nothing in the background.
 
 ---
 
@@ -98,20 +116,29 @@ Version `v10.1.0-neo.1` focuses on reliability. The full list with technical det
 The work is done in stages. Each stage is tested on a real device before the next one starts.
 
 ### Stage 1: Bug fixes and documentation ✅
-Everything listed above.
+Everything listed under [What has been fixed](#what-has-been-fixed).
 
-### Stage 2: A modern look
-- A fresh Material 3 design that follows your system colors and dark mode
-- A large progress ring on the home screen with the current streak at a glance
-- Clearer navigation with a bottom navigation bar
-- A tidier detail page with tabs for summary, milestones, savings, notes and timeline
-- Smooth animations and better readability on small and large screens
+### Stage 2: Savings, explanations and diagnostics ✅ (preview)
+Everything listed under [What's new](#whats-new).
 
-### Stage 3: New features
+### Stage 3: Display options and a new look
+The app will come in two variants: the **classic** look and a **new** look. Both get:
+- Per-entry display precision: choose which units are shown, for example only years, or hours and
+  minutes without seconds (the time is still tracked exactly)
+- A countdown to the next milestone, with the option to hide or show the counter
+
+The new look additionally gets:
+- Swipeable tabs that you can set up yourself, filled automatically (for example by priority) or by
+  hand, plus an "All" tab
+- Per-entry choice of which buttons are shown on a card (the relapse button always stays)
+- A fresh Material 3 design with a true black (AMOLED) theme
+- Many more settings to make it your own
+
+### Stage 4: More features
 **Planned first**
+- Tutorials on first start, split into short topics, skippable and available again in the settings
 - Option to show the streak as total days ("45 days") or split up ("1 month 2 weeks 1 day")
 - Log a relapse at a chosen date and time, and edit or delete past entries
-- Savings totals: money and time saved since the start
 - Notifications when a milestone is reached, plus achievement badges
 - Home screen widget
 - App lock with PIN or fingerprint
@@ -129,6 +156,21 @@ Everything listed above.
 - More translations
 
 The roadmap is a plan, not a promise. Priorities may change.
+
+---
+
+## Diagnostics (optional)
+
+Sobriety Neo can keep an anonymous technical log on your phone. It is **off by default** and only
+helps to find performance problems and crashes.
+
+- Turn it on in **Settings → Diagnostics → Collect diagnostic logs**.
+- Recorded: start-up and screen loading times, how long saving and loading take, the number of
+  entries, whether the counter runs smoothly, and crashes (error type and code location only).
+- Never recorded: names of your entries, notes, amounts, relapse dates, or anything that identifies
+  you or your phone.
+- The log stays on your phone (max. 256 KB). It only leaves your phone if you export it
+  (**Settings → Diagnostics → Export**) and send it to someone yourself.
 
 ---
 
@@ -167,25 +209,23 @@ fixed release schedule.
 
 ## Thank you
 
-A big and heartfelt thank you to **Katie Rose**, who created Sobriety, and to everyone who contributed
+A big and heartfelt thank you to **[seaglade](https://github.com/seaglade)**, who created Sobriety, and to everyone who contributed
 to the original project. Sobriety was built with a clear and kind goal: a recovery tool that is free,
 respects your privacy and never profits from people's struggles. This fork exists because that work
 was so good that it was worth continuing.
 
-Thank you to everyone who contributed code, ideas, translations and testing to the original project,
-including:
+Thank you to everyone who contributed to the original project, including (by GitHub username):
 
-- **Katie Rose** ([seaglade](https://github.com/seaglade), formerly KiARC), creator and maintainer
-- **JakeGonder**
-- **cubandle**
-- **unbiaseduser**
-- **neoplus72**
-- **CastelJeremy**
-- **Eric-Jim-Lab**
-- **Poussinou**
-- **IzzyOnDroid**, for distributing the app
-- **Donnnno**, for the Sobriety icon in the [Arcticons](https://github.com/Donnnno/Arcticons) icon pack
-- all translators and everyone who reported bugs and shared ideas
+- [seaglade](https://github.com/seaglade), creator and maintainer
+- [unbiaseduser-github](https://github.com/unbiaseduser-github)
+- [cubandle](https://github.com/cubandle)
+- [mvnowak](https://github.com/mvnowak)
+- [CastelJeremy](https://github.com/CastelJeremy)
+- [Eric-Jim-Lab](https://github.com/Eric-Jim-Lab)
+- [IzzySoft](https://github.com/IzzySoft), for distributing the app through the IzzyOnDroid repository
+- [Poussinou](https://github.com/Poussinou)
+- [Donnnno](https://github.com/Donnnno), for the Sobriety icon in the [Arcticons](https://github.com/Donnnno/Arcticons) icon pack
+- and everyone else who contributed code, translations, bug reports and ideas
 
 The original project's README, including the story of how Sobriety began, is preserved unchanged in
 [docs/ORIGINAL-README.md](docs/ORIGINAL-README.md).

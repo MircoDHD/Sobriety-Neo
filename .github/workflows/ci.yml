@@ -2,16 +2,18 @@
 #
 # What happens on every push:
 #   1. the unit tests of the shared module run (time calculation, data model),
-#   2. a debug APK is built,
-#   3. the APK is attached to the workflow run (artifact). For pushes to master (and builds started
-#      by hand) it is also published as a "pre-release" on the Releases page, so it can be
-#      downloaded directly on a phone.
+#   2. the debug APKs of both variants (neo, classic) are built,
+#   3. the APKs are attached to the workflow run (artifact).
+# A release on the Releases page is only created for a pushed version tag ("v*") or a build
+# started by hand; see the last two steps.
 #
 # To install a build: open the repository on GitHub -> Releases -> newest entry -> tap the .apk file.
 name: Android CI
 
 on:
   push:
+    branches: ['**']
+    tags: ['v*']
   pull_request:
     types: [opened, reopened]
   # Allows starting a build by hand from the "Actions" tab.
@@ -109,23 +111,36 @@ jobs:
         name: Sobriety-Neo-debug-apk
         path: app/build/outputs/apk/*/debug/*.apk
 
-    # Publishes the APK on the Releases page, for pushes to master and for builds started by hand
-    # ("Run workflow" in the Actions tab, which also works for other branches). Pushes to other
-    # branches only keep the APK as a workflow artifact, so the Releases page is not flooded.
-    - name: Publish pre-release with the APK
-      if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'workflow_dispatch'
+    # Releases are only created on purpose (controlled releases):
+    #  - pushing a version tag "v*" (e.g. `git tag v11.1.0-neo.1 && git push origin v11.1.0-neo.1`)
+    #    creates a release named after the tag. Tags containing "-" (e.g. "-preview", "-beta")
+    #    become pre-releases, tags without "-" (e.g. "v11.1.0") become normal releases.
+    #  - "Run workflow" in the Actions tab creates a numbered test build (pre-release "build-N").
+    # Pushes to branches (also master) only run the tests and keep the APKs as a workflow artifact.
+    - name: Publish release for a version tag
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Sobriety Neo ${{ github.ref_name }}
+        prerelease: ${{ contains(github.ref_name, '-') }}
+        files: app/build/outputs/apk/*/debug/*.apk
+        body: |
+          Sobriety Neo ${{ github.ref_name }}. Changes: see CHANGELOG-FORK.md.
+          Two variants (they can be installed side by side, each keeps its own data):
+          - `...-neo-debug.apk`: Sobriety Neo with the new look (main app)
+          - `...-classic-debug.apk`: Sobriety Neo Classic, the original look
+          Download the `.apk` file below and install it on an Android phone.
+
+    - name: Publish test build (started by hand)
+      if: github.event_name == 'workflow_dispatch'
       uses: softprops/action-gh-release@v2
       with:
         tag_name: build-${{ github.run_number }}
         target_commitish: ${{ github.sha }}
-        name: Build ${{ github.run_number }} (${{ github.ref_name }})
+        name: Test build ${{ github.run_number }} (${{ github.ref_name }})
         prerelease: true
         files: app/build/outputs/apk/*/debug/*.apk
         body: |
           Test build of branch `${{ github.ref_name }}` (commit ${{ github.sha }}).
-          Two variants (download one or both, they can be installed side by side):
           - `...-neo-debug.apk`: Sobriety Neo with the new look (main app)
           - `...-classic-debug.apk`: Sobriety Neo Classic, the original look
-          Download the `.apk` file below and install it on an Android phone.
-          The app can be installed next to the original Sobriety app. Use "Export" in the
-          settings of the old app and "Import" in this one to take your data along.

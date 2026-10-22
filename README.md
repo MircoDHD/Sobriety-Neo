@@ -37,16 +37,18 @@ new features step by step.
 
 1. Open the [Releases page](https://github.com/MircoDHD/Sobriety-Neo/releases) on your phone.
 2. Tap the newest entry and download the `.apk` file of the variant you want:
-   - **`…-neo-debug.apk` – Sobriety Neo**: the new look with tabs, progress rings and many options.
-   - **`…-classic-debug.apk` – Sobriety Neo Classic**: the look of the original app, with all the
+   - **`…-neo-release.apk` – Sobriety Neo**: the new look with tabs, progress rings and many options.
+   - **`…-classic-release.apk` – Sobriety Neo Classic**: the look of the original app, with all the
      new features that fit into it.
 3. Open the file. Android may ask you to allow installing apps from your browser or file manager.
 
 Both variants can be installed side by side, but each keeps its own data. To move your entries from
 one to the other, use **Settings → Data → Export / Import**.
 
-Every change to the code builds a new test version automatically. These builds are marked
-**Pre-release**: they are meant for testing and may contain bugs.
+**Coming from a preview version (v10.2.0 or v11.0.0 preview, `…-debug.apk`)?** From v11.0.0 on the
+app is signed with its own private key, so Android can not install it over a preview. Export your
+data first (**Settings → Data → Export**), uninstall the preview, install the new version and import
+the file. Later updates install normally again.
 
 Sobriety Neo has its own app ID (`io.github.mircodhd.sobrietyneo`). It installs **next to** the original
 Sobriety app and does not replace or touch it.
@@ -63,7 +65,7 @@ one is renamed, for example "Smoking (2)", so nothing is overwritten.
 
 ## What's new
 
-**v11.0.0 (preview): the new look**
+**v11.0.0: the new look**
 - **New main screen.** Cards with a progress ring that fills up towards your next milestone, the
   number of days inside, and the money and time you saved.
 - **Tabs.** Swipe between tabs you set up yourself. A tab can be filled automatically (for example
@@ -73,8 +75,10 @@ one is renamed, for example "Smoking (2)", so nothing is overwritten.
   Choose how exact the time is shown (for example only years, or hours and minutes without
   seconds); the time is still tracked exactly. In the new look you can also hide card buttons you do
   not need (the relapse button always stays).
-- **Statistics and charts.** Current and longest streak, average attempt, relapses per month, and
-  the length of your last attempts.
+- **Statistics.** Choose "All" or one entry; tiles with the key numbers in short form ("3 mo 2 w")
+  and one chart at a time: relapses per month or the length of your attempts.
+- **Savings in your current streak.** Cards and the Savings screen show what you saved in total and
+  since your last relapse, for example the time you got back with "8 hours per week".
 - **Default milestones.** New entries get 1 day, 1 week, 1, 3 and 6 months, and 1, 2 and 5 years.
   The set can be changed or turned off in the settings, and removed from any entry.
 - **Savings:** time is now a category like money, and the name is optional for money and time.
@@ -134,7 +138,7 @@ Version `v10.1.0-neo.1` focuses on reliability. The full list with technical det
   logic; see [ARCHITECTURE.md](ARCHITECTURE.md).
 - Unit tests for the time calculation and the data model.
 - An architecture overview: [ARCHITECTURE.md](ARCHITECTURE.md).
-- Automatic builds: every push runs the tests and publishes an installable APK.
+- Automatic checks: every push runs the tests and builds the app. Releases are published by hand.
 
 ---
 
@@ -148,7 +152,7 @@ Everything listed under [What has been fixed](#what-has-been-fixed).
 ### Stage 2: Savings, explanations and diagnostics ✅ (preview)
 Everything listed under [What's new](#whats-new).
 
-### Stage 3: Display options, statistics and a new look ✅ (preview)
+### Stage 3: Display options, statistics and a new look ✅ (v11.0.0)
 Everything listed under [v11.0.0](#whats-new). Both variants get the display options, the milestone
 countdown, statistics and default milestones; the new look adds tabs, the new cards, button choices
 and the true black theme.

@@ -28,6 +28,10 @@ import kotlinx.serialization.Serializable
  * fractions of 24 hours, so the value grows smoothly. Money spent during relapses is subtracted
  * from MONEY savings in the [Addiction.primaryCurrency]; time spent is subtracted from the time
  * saving. The result can be negative if more was spent than saved.
+ *
+ * Three windows are calculated: all time, the current calendar month, and the current streak
+ * (the running attempt since the last relapse). The current streak subtracts no relapse costs:
+ * they belong to the relapse that ended the previous attempt, not to the clean time after it.
  */
 
 /** What kind of thing is saved. Decides how the value is shown and whether relapse costs apply. */
@@ -87,13 +91,19 @@ data class RelapseCost(
     val minutes: Long = 0
 )
 
-/** Total and "this month" value of one saving. */
+/**
+ * Total, "this month" and "current streak" value of one saving.
+ *
+ * @property currentStreak saved during the running attempt; 0 if the addiction is stopped or
+ *   starts in the future (see [SavingsSummary.hasCurrentStreak])
+ */
 data class SavingTotal(
     val name: String,
     val unit: String,
     val category: SavingCategory,
     val total: Double,
-    val thisMonth: Double
+    val thisMonth: Double,
+    val currentStreak: Double = 0.0
 )
 
 /** Everything the UI needs to show the savings of one addiction. */
@@ -105,6 +115,10 @@ data class SavingsSummary(
     /** Time saved in minutes (null if no time saving is set). */
     val timeTotalMinutes: Double?,
     val timeThisMonthMinutes: Double?,
+    /** Time saved in the current streak in minutes (null if no time saving is set). */
+    val timeCurrentStreakMinutes: Double?,
+    /** True if an attempt is running, i.e. the "current streak" values mean something. */
+    val hasCurrentStreak: Boolean,
     /** Spent during relapses, over all time and in the current month. */
     val moneySpentTotal: Double,
     val moneySpentThisMonth: Double,
@@ -184,6 +198,10 @@ fun Addiction.calculateSavings(
     val monthStart = startOfMonthMillis(nowMillis, timeZone)
     val soberDaysTotal = soberMillisBetween(Long.MIN_VALUE, Long.MAX_VALUE, nowMillis) / MILLIS_PER_DAY
     val soberDaysMonth = soberMillisBetween(monthStart, Long.MAX_VALUE, nowMillis) / MILLIS_PER_DAY
+    // The running attempt starts at the last key of the history (the last relapse or the start).
+    val hasCurrentStreak = status == Addiction.Status.Ongoing
+    val soberDaysStreak = if (hasCurrentStreak)
+        soberMillisBetween(history.keys.last(), Long.MAX_VALUE, nowMillis) / MILLIS_PER_DAY else 0.0
 
     val moneySpentTotal = relapseCosts.sumOf { it.money }
     val moneySpentMonth = relapseCosts.filter { it.timeMillis >= monthStart }.sumOf { it.money }
@@ -194,16 +212,18 @@ fun Addiction.calculateSavings(
     val items = savings.map { (name, value) ->
         val (perDay, unit) = value
         val category = savingsMeta[name]?.category ?: SavingCategory.CUSTOM
-        SavingTotal(name, unit, category, perDay * soberDaysTotal, perDay * soberDaysMonth)
+        SavingTotal(name, unit, category, perDay * soberDaysTotal, perDay * soberDaysMonth, perDay * soberDaysStreak)
     }
 
-    // Add up money per currency and subtract the relapse costs once, from the primary currency.
+    // Add up money per currency and subtract the relapse costs once, from the primary currency
+    // (not from the current streak, see the comment at the top of this file).
     val moneyByCurrency = LinkedHashMap<String, SavingTotal>()
     for (item in items.filter { it.category == SavingCategory.MONEY }) {
         val existing = moneyByCurrency[item.unit]
         moneyByCurrency[item.unit] = existing?.copy(
             total = existing.total + item.total,
-            thisMonth = existing.thisMonth + item.thisMonth
+            thisMonth = existing.thisMonth + item.thisMonth,
+            currentStreak = existing.currentStreak + item.currentStreak
         ) ?: item.copy(name = item.unit)
     }
     moneyByCurrency[currency]?.let {
@@ -222,6 +242,8 @@ fun Addiction.calculateSavings(
         moneyByCurrency = moneyByCurrency,
         timeTotalMinutes = if (timeSet) timePerDayMinutes * soberDaysTotal - minutesSpentTotal else null,
         timeThisMonthMinutes = if (timeSet) timePerDayMinutes * soberDaysMonth - minutesSpentMonth else null,
+        timeCurrentStreakMinutes = if (timeSet) timePerDayMinutes * soberDaysStreak else null,
+        hasCurrentStreak = hasCurrentStreak,
         moneySpentTotal = moneySpentTotal,
         moneySpentThisMonth = moneySpentMonth,
         minutesSpentTotal = minutesSpentTotal,

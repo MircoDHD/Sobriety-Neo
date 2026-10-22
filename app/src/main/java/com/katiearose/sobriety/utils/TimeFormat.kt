@@ -7,6 +7,7 @@ import com.katiearose.sobriety.shared.CounterMode
 import com.katiearose.sobriety.shared.DisplaySettings
 import com.katiearose.sobriety.shared.ElapsedTime
 import com.katiearose.sobriety.shared.TimeUnitLevel
+import com.katiearose.sobriety.shared.compactDurationUnits
 import com.katiearose.sobriety.shared.nextMilestone
 import com.katiearose.sobriety.shared.visibleUnits
 import kotlinx.datetime.DateTimeUnit
@@ -43,6 +44,33 @@ fun Context.convertRangeToString(start: Long, end: Long, settings: DisplaySettin
     val units = ElapsedTime.between(start, end).visibleUnits(settings)
     if (units.isEmpty()) return getString(R.string.less_than, unitText(settings.smallestUnit, 1))
     return units.joinToString(" ") { unitText(it.first, it.second) }
+}
+
+/** Format string of each unit in the short format ("%d y", "%d mo", ...). */
+private fun shortFormatFor(level: TimeUnitLevel): Int = when (level) {
+    TimeUnitLevel.YEARS -> R.string.duration_short_years
+    TimeUnitLevel.MONTHS -> R.string.duration_short_months
+    TimeUnitLevel.WEEKS -> R.string.duration_short_weeks
+    TimeUnitLevel.DAYS -> R.string.duration_short_days
+    TimeUnitLevel.HOURS -> R.string.duration_short_hours
+    TimeUnitLevel.MINUTES -> R.string.duration_short_minutes
+    TimeUnitLevel.SECONDS -> R.string.duration_short_seconds
+}
+
+/**
+ * A duration in the short format of the Statistics screen, e.g. "3 mo 2 w" or "5 h 30 min"
+ * (at most two units, see compactDurationUnits() in the shared module). Below one minute the
+ * text is "< 1 min"; nothing at all (e.g. a tracker that starts in the future) is "0 min", so
+ * the two cases can be told apart.
+ *
+ * @param millis the duration, e.g. a streak
+ * @param now the moment the duration ends at; the calendar part is counted back from here
+ */
+fun Context.compactDurationText(millis: Long, now: Long = System.currentTimeMillis()): String {
+    if (millis <= 0) return getString(R.string.duration_short_minutes, 0)
+    val units = compactDurationUnits(millis, now)
+    if (units.isEmpty()) return getString(R.string.duration_short_less_than_minute)
+    return units.joinToString(" ") { getString(shortFormatFor(it.first), it.second) }
 }
 
 /** A milestone as text, e.g. "3 months". */

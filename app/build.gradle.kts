@@ -1,5 +1,7 @@
 // Build file of the Android app module.
 // The shared (platform independent) code lives in the :shared module.
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -16,9 +18,11 @@ android {
         applicationId = "io.github.mircodhd.sobrietyneo"
         minSdk = 21
         targetSdk = 33
-        // Increase versionCode with every release, otherwise Android refuses to update the app.
-        versionCode = 25
-        versionName = "v11.0.0-neo.1-preview"
+        // Increase versionCode with every build that is installed over an older one, otherwise
+        // Android refuses the update. Version names: releases on GitHub are "v11.0.0", "v11.0.1";
+        // local test builds before a release are "v11.0.1-1", "v11.0.1-2", ... (never published).
+        versionCode = 26
+        versionName = "v11.0.0"
         setProperty("archivesBaseName", "Sobriety-Neo-$versionName")
     }
 
@@ -48,18 +52,32 @@ android {
         // FORK: one fixed key for debug builds. Builds on GitHub get a fresh random debug key on
         // every run, and Android refuses to install an update that is signed with another key
         // ("App not installed"). The key is public (password "android"), which is fine for personal
-        // test builds but it must NOT be used to publish the app in a store. Release builds will
-        // need their own private key kept as a GitHub secret.
+        // test builds but it must NOT be used to publish the app. Releases use the private key below.
         getByName("debug") {
             storeFile = file("fork-debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+
+        // Release key: private, never in the repository. Its location is read from a properties
+        // file (storeFile, storePassword, keyAlias, keyPassword) whose path is given by
+        //   - the line "release.signing=/path/to/signing.properties" in local.properties, or
+        //   - the environment variable SOBRIETY_SIGNING_PROPERTIES.
+        // Without it, release builds are produced unsigned (and can not be installed).
+        releaseSigningProperties()?.let { props ->
+            create("release") {
+                storeFile = file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
@@ -124,4 +142,15 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.4")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")
+}
+
+/** The release signing properties (see signingConfigs above), or null if none are configured. */
+fun releaseSigningProperties(): Properties? {
+    val local = Properties()
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) localFile.inputStream().use { local.load(it) }
+    val path = local.getProperty("release.signing") ?: System.getenv("SOBRIETY_SIGNING_PROPERTIES") ?: return null
+    val file = File(path)
+    if (!file.exists()) return null
+    return Properties().apply { file.inputStream().use { load(it) } }
 }

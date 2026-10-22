@@ -95,3 +95,31 @@ fun relapsesPerMonth(
     }
     return keys.map { it to counts.getValue(it) }
 }
+
+/**
+ * Display options of the short durations on the Statistics screen: at most two units, nothing
+ * smaller than minutes ("3 mo 2 w", "5 h 30 min").
+ */
+val COMPACT_DURATION = DisplaySettings(maxUnits = 2, smallestUnit = TimeUnitLevel.MINUTES)
+
+/**
+ * Splits a duration into the units of the short format ([COMPACT_DURATION]).
+ *
+ * A duration of milliseconds has no calendar position, but months and years have different
+ * lengths. So the duration is read as "the time that ends now" and split with the same
+ * calendar-correct [ElapsedTime] as the counters. For the current streak this gives exactly
+ * the same numbers as the card (its start is the last relapse, its end is now).
+ *
+ * @param durationMillis the duration, e.g. a streak or the time clean in total
+ * @param nowMillis the moment the duration ends at (normally the current time)
+ * @param timeZone zone of the calendar part; tests pass a fixed one
+ * @return the units to show, largest first; empty if less than one minute (or nothing) passed
+ */
+fun compactDurationUnits(
+    durationMillis: Long,
+    nowMillis: Long,
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): List<Pair<TimeUnitLevel, Int>> {
+    if (durationMillis <= 0) return emptyList()
+    return ElapsedTime.between(nowMillis - durationMillis, nowMillis, timeZone).visibleUnits(COMPACT_DURATION)
+}

@@ -4,7 +4,10 @@ This file lists what differs from the upstream project
 ([seaglade/Sobriety](https://github.com/seaglade/Sobriety), last upstream commit `ad94ed6`).
 Newest entries first.
 
-## v11.0.0-neo.1-preview - new look, display options, statistics
+## v11.0.0 - new look, statistics, savings in the current streak
+
+First regular release. Signed with a private release key (earlier previews used a public debug
+key, so they can not be updated in place: export, uninstall, install, import).
 
 ### Added
 - **Two variants (product flavors):** `neo` (new look, main app, keeps the app id) and `classic`
@@ -15,8 +18,16 @@ Newest entries first.
   (relapse always visible); true black (AMOLED) theme overlay.
 - **Display options per tracker (both):** counter / countdown to the next milestone / both;
   maximum number of units and smallest unit shown (`DisplaySettings.kt`, `TimeFormat.kt`).
-- **Statistics screen (both):** relapses per month, streaks, averages, attempt lengths, with a small
-  built-in bar chart view (no chart library).
+- **Statistics screen (both):** selector ("All" + one chip per tracker, remembered), four tiles
+  with the key numbers in a short format with at most two units ("3 mo 2 w";
+  `compactDurationUnits()` in `shared/.../Statistics.kt`, `compactDurationText()` in
+  `utils/TimeFormat.kt`), and one chart at a time: relapses per month, or (per tracker, via a
+  toggle) attempt lengths with the average of finished attempts. A hint replaces the chart while
+  there is no relapse. Small built-in bar chart view (no chart library).
+- **Savings in the current streak:** every saving is also calculated for the running attempt
+  (`SavingTotal.currentStreak`, `SavingsSummary.timeCurrentStreakMinutes`, `hasCurrentStreak`),
+  without subtracting relapse costs. Cards show "saved · this streak"; the Savings screen shows
+  total, this streak and this month.
 - **Default milestones (both):** 1 day, 1 week, 1/3/6 months, 1/2/5 years for new trackers;
   opt-out switch, editable list, "add to existing entries".
 - **Formatted explanation of every setting** (HTML) behind the ⓘ on the settings screen.
@@ -26,6 +37,8 @@ Newest entries first.
   into a Time saving when the data is loaded. The name is optional for money and time.
 - Relapse dialog and note-after-relapse moved to `utils/TrackerDialogs.kt` (shared by both UIs).
 - Data format: new key `display`.
+- Releases are signed with a private key and published by hand; CI only runs the tests and
+  builds the debug APKs (workflow artifact).
 
 ## v10.2.0-neo.1-preview - savings, explanations, diagnostics
 

@@ -161,12 +161,17 @@
     <string name="saving_rate_line">%1$s %2$s · %3$s</string>
     <string name="savings_totals">Total saved</string>
     <string name="savings_totals_empty">Nothing to calculate yet. Add a saving below or set the time saved per day.</string>
-    <!-- "Money: 123.40 € (this month: 45.10 €)" -->
-    <string name="savings_total_line">%1$s: %2$s (this month: %3$s)</string>
+    <!-- "Money: 123.40 € (this streak: 12.00 € · this month: 45.10 €)" -->
+    <string name="savings_total_line">%1$s: %2$s (this streak: %3$s · this month: %4$s)</string>
+    <!-- Same for a stopped entry or one that starts in the future (no running streak). -->
+    <string name="savings_total_line_no_streak">%1$s: %2$s (this month: %3$s)</string>
     <string name="savings_spent_money_line">Spent during relapses: %1$s (this month: %2$s)</string>
     <string name="savings_spent_time_line">Time spent during relapses: %1$s (this month: %2$s)</string>
-    <string name="card_savings_money">💰 %1$s saved · %2$s this month</string>
-    <string name="card_savings_time">⏱ %1$s saved · %2$s this month</string>
+    <!-- Cards on the main screen: saved in total · saved since the last relapse. -->
+    <string name="card_savings_money">💰 %1$s saved · %2$s this streak</string>
+    <string name="card_savings_time">⏱ %1$s saved · %2$s this streak</string>
+    <string name="card_savings_money_total">💰 %1$s saved</string>
+    <string name="card_savings_time_total">⏱ %1$s saved</string>
     <string name="duration_days_hours">%1$d d %2$d h</string>
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
 
@@ -194,7 +199,7 @@
     <string name="info_main">Each card is one thing you want to stay away from.\n\n• The counter shows how long it has been since your last relapse. It is calculated from the saved time, so nothing runs in the background.\n• Tap the card for a detailed summary with progress bars.\n• Tap the priority to change it. Cards are sorted by priority.\n• ↺ logs a relapse (or starts tracking again).\n• ■ stops tracking. The time stays saved.\n• Timeline shows all attempts.\n• … opens daily notes, savings, display options and milestones.\n• 🗑 deletes the entry for good.\n\nDisplay options: choose whether the card shows the counter, a countdown to the next milestone, or both, and how exact the time is shown.\n\nThe chart button at the top opens your statistics.</string>
     <string name="info_relapse">Logging a relapse ends the current attempt and starts a new one right now. Your history is kept in the timeline.\n\nMoney and time spent are optional. If you enter them, they are subtracted from your savings, so the totals stay honest. Leave the fields empty if you do not want to track this.</string>
     <string name="info_add_saving">Enter what you save by not doing it.\n\n• Money: the amount and its currency. All money savings are added up and shown on the main screen, for this month and in total.\n• Time: hours you used to spend on it (1.5 = one and a half hours).\n• Other: anything you can count, for example cigarettes or drinks.\n\n\"Per\" tells the app whether the amount is per day, per week or per month. The app converts it to a daily value and multiplies it by the time you stayed clean.\n\nThe name is optional for money and time. Without a name the category is used, e.g. \"Money\".</string>
-    <string name="info_savings">Here you see what staying clean has given you so far.\n\nThe totals are calculated like this: amount per day × the time you stayed clean, in all attempts together. Money and time you entered when logging a relapse are subtracted.\n\n\"This month\" only counts the current calendar month.\n\nEvery saving has a category: money, time or other. Tap + to add one, the pencil to change it.</string>
+    <string name="info_savings">Here you see what staying clean has given you so far.\n\nThe totals are calculated like this: amount per day × the time you stayed clean, in all attempts together. Money and time you entered when logging a relapse are subtracted.\n\n\"This streak\" counts only the time since your last relapse (relapse costs are not subtracted there, they belong to the time before). \"This month\" only counts the current calendar month. The cards on the main screen show the total and this streak.\n\nExample: if you used to spend 8 hours a week on it, add a time saving of 8 hours per week. You then see how much time you got back in total and in your current streak.\n\nEvery saving has a category: money, time or other. Tap + to add one, the pencil to change it.</string>
     <string name="info_timeline">The timeline lists every attempt: when it started, when it ended and how long it lasted.\n\nThe hourglass button calculates the average length of the attempts you choose.</string>
     <string name="info_milestones">Milestones are goals such as \"7 days\" or \"3 months\". The bar shows how close you are, and the date shows when you will reach it.\n\nMonths and years follow the calendar, exactly like the counter.</string>
     <string name="info_daily_notes">Write down how a day went, what helped or what was difficult. There is one note per day.\n\nIf enabled in the settings, the app offers to write a note after a relapse.</string>
@@ -238,12 +243,36 @@
 
     <string name="statistics">Statistics</string>
     <string name="statistics_empty">Add an entry to see statistics.</string>
-    <string name="statistics_overview">Overview</string>
-    <string name="statistics_overview_numbers">Entries: %1$d\nRelapses in total: %2$d\nRelapses in the last 30 days: %3$d</string>
     <string name="statistics_relapses_per_month">Relapses per month</string>
-    <string name="statistics_tracker_numbers">Current streak: %1$s\nLongest streak: %2$s\nAverage attempt: %3$s\nRelapses: %4$d (last 30 days: %5$d)\nClean in total: %6$s</string>
-    <string name="statistics_attempt_lengths">Length of the last attempts (days)</string>
-    <string name="info_statistics">• Overview: how many relapses happened in each of the last 12 months, for all entries together.\n• Per entry: your current and longest streak, the average length of finished attempts, the number of relapses and the time you stayed clean in total.\n• The chart shows the length of the last attempts in days, the newest on the right.\n\nEverything is calculated on your phone from the times you saved.</string>
+    <!-- Statistics screen: selector and key number tiles -->
+    <string name="statistics_all">All</string>
+    <string name="statistics_entries">Entries</string>
+    <string name="statistics_current_streak">Current streak</string>
+    <string name="statistics_longest_streak">Longest streak</string>
+    <string name="statistics_relapses_total">Relapses in total</string>
+    <string name="statistics_relapses_30_days">Relapses, last 30 days</string>
+    <string name="statistics_clean_total">Clean in total</string>
+    <string name="statistics_stopped">Stopped</string>
+    <string name="statistics_not_started">Not started</string>
+    <!-- Short units of the Statistics screen ("3 mo 2 w"). Seconds are never shown there. -->
+    <string name="duration_short_years">%d y</string>
+    <string name="duration_short_months">%d mo</string>
+    <string name="duration_short_weeks">%d w</string>
+    <string name="duration_short_days">%d d</string>
+    <string name="duration_short_hours">%d h</string>
+    <string name="duration_short_minutes">%d min</string>
+    <string name="duration_short_seconds">%d s</string>
+    <string name="duration_short_less_than_minute">&lt; 1 min</string>
+    <!-- Chart toggle; short so that both fit next to each other on small phones. -->
+    <string name="statistics_toggle_months">Per month</string>
+    <string name="statistics_toggle_attempts">Attempts</string>
+    <string name="statistics_caption_months">Number of relapses in each of the last 12 months, newest on the right.</string>
+    <string name="statistics_caption_attempts">Days clean in each attempt, newest on the right (at most the last %d).</string>
+    <!-- Appended below the attempt chart: "Average of finished attempts: 3 w 2 d" -->
+    <string name="statistics_average_attempt">Average of finished attempts: %s</string>
+    <string name="statistics_no_relapses">No relapses yet. The charts appear after the first relapse.</string>
+    <string name="statistics_no_relapses_all">No relapses yet in any entry. The chart appears after the first relapse.</string>
+    <string name="info_statistics">Choose at the top what you want to see: \"All\" or one entry. Your choice is remembered.\n\n• The tiles show the key numbers. Times are shortened to the two largest units, for example \"3 mo 2 w\" (3 months 2 weeks).\n• \"Current streak\" is the time since your last relapse, \"longest streak\" your longest attempt so far, \"clean in total\" all attempts together.\n• For one entry you can switch the chart between relapses per month (last 12 months) and the length of your attempts in days. Below the attempt chart you see the average of your finished attempts.\n• Charts only appear once there was a relapse; before that there is nothing to compare.\n\nUnits: y = years, mo = months, w = weeks, d = days, h = hours, min = minutes.\n\nEverything is calculated on your phone from the times you saved.</string>
 
     <string name="default_milestones">Default milestones</string>
     <string name="default_milestones_summary">New entries get a set of milestones. You can remove them from an entry at any time.</string>

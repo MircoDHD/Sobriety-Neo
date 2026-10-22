@@ -138,4 +138,42 @@ class DisplayAndStatisticsTest {
         val back = json.decodeFromString(ser, json.encodeToString(ser, listOf(a))).single()
         assertEquals(a.display, back.display)
     }
+
+    // ----- Short durations of the Statistics screen -----
+
+    private val now = millis(2026, 10, 22)
+
+    @Test
+    fun compactDurationShowsTwoUnits() {
+        // 7 Sep to 22 Oct = 1 month 2 weeks 1 day; the day is cut off by the two-unit limit.
+        assertEquals(
+            listOf(TimeUnitLevel.MONTHS to 1, TimeUnitLevel.WEEKS to 2),
+            compactDurationUnits(now - millis(2026, 9, 7), now, tz)
+        )
+    }
+
+    @Test
+    fun compactDurationLeavesOutZeroUnits() {
+        // 1 year 0 months 3 days: only "1 y", no "0 mo".
+        assertEquals(
+            listOf(TimeUnitLevel.YEARS to 1),
+            compactDurationUnits(now - millis(2025, 10, 19), now, tz)
+        )
+    }
+
+    @Test
+    fun compactDurationBelowOneDayUsesHoursAndMinutes() {
+        val duration = 5 * 60 * 60 * 1000L + 30 * 60 * 1000L + 59 * 1000L
+        assertEquals(
+            listOf(TimeUnitLevel.HOURS to 5, TimeUnitLevel.MINUTES to 30),
+            compactDurationUnits(duration, now, tz)
+        )
+    }
+
+    @Test
+    fun compactDurationBelowOneMinuteIsEmpty() {
+        assertTrue(compactDurationUnits(30 * 1000L, now, tz).isEmpty())
+        assertTrue(compactDurationUnits(0, now, tz).isEmpty())
+        assertTrue(compactDurationUnits(-5, now, tz).isEmpty())
+    }
 }

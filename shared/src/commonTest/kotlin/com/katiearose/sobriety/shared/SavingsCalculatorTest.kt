@@ -167,4 +167,56 @@ class SavingsCalculatorTest {
         assertTrue(back.relapseCosts.isEmpty())
         assertEquals(Pair(2.0, "€"), back.savings["Money"])
     }
+
+    // ----- Current streak (time since the last relapse) -----
+
+    /** Two attempts: 20 days until a relapse, then a running one of 7 days. */
+    private fun twoAttempts(): Pair<Addiction, Long> {
+        val first = millis(2026, 9, 1)
+        val relapse = first + 20 * day
+        val now = relapse + 7 * day
+        val history = LinkedHashMap<Long, Long>()
+        history[first] = relapse
+        history[relapse] = 0
+        val a = Addiction("t", Addiction.Status.Ongoing, history, Addiction.Priority.MEDIUM,
+            LinkedHashMap(), LocalTime(0, 0), LinkedHashMap(), LinkedHashSet())
+        return a to now
+    }
+
+    @Test
+    fun timePerWeekForAllAttemptsAndTheCurrentStreak() {
+        val (a, now) = twoAttempts()
+        // 8 hours per week, stored per day like every saving.
+        a.savings["Time"] = Pair(8.0 / 7.0, TIME_SAVING_UNIT)
+        a.savingsMeta["Time"] = SavingMeta(SavingCategory.TIME, RatePeriod.WEEK, 8.0)
+        val s = a.calculateSavings(now, tz)
+        assertTrue(s.hasCurrentStreak)
+        // 27 clean days in total: 27 / 7 weeks * 8 h; the current streak is exactly one week.
+        assertNear(27.0 / 7.0 * 8 * 60, s.timeTotalMinutes!!, 1e-3)
+        assertNear(8.0 * 60, s.timeCurrentStreakMinutes!!, 1e-3)
+    }
+
+    @Test
+    fun currentStreakIgnoresRelapseCosts() {
+        val (a, now) = twoAttempts()
+        a.addMoney("Cigarettes", 5.0)
+        a.relapseCosts += RelapseCost(timeMillis = a.history.keys.last(), money = 12.0)
+        val money = a.calculateSavings(now, tz).moneyByCurrency.getValue("€")
+        assertNear(27 * 5.0 - 12.0, money.total)
+        assertNear(7 * 5.0, money.currentStreak)
+    }
+
+    @Test
+    fun stoppedAddictionHasNoCurrentStreak() {
+        val start = millis(2026, 9, 1)
+        val history = LinkedHashMap<Long, Long>()
+        history[start] = start + 10 * day
+        val a = Addiction("t", Addiction.Status.Stopped, history, Addiction.Priority.MEDIUM,
+            LinkedHashMap(), LocalTime(0, 0), LinkedHashMap(), LinkedHashSet())
+        a.addMoney("Cigarettes", 5.0)
+        val s = a.calculateSavings(start + 30 * day, tz)
+        assertTrue(!s.hasCurrentStreak)
+        assertNear(50.0, s.moneyByCurrency.getValue("€").total)
+        assertNear(0.0, s.moneyByCurrency.getValue("€").currentStreak)
+    }
 }

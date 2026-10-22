@@ -1,15 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Statistics screen (Sobriety Neo). The sections are added in code, see Statistics.kt. -->
+<!--
+  Statistics screen (Sobriety Neo), see Statistics.kt.
+  From top to bottom: a selector ("All" + one chip per entry), four tiles with the key numbers
+  of the selection, and one chart card (or a hint if there is nothing to draw).
+-->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.Statistics">
 
     <LinearLayout
-        android:id="@+id/sections"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="8dp" />
+        android:padding="8dp">
+
+        <!-- Scrolls sideways when there are more entries than fit on the screen. -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:clipToPadding="false"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/tracker_chips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true" />
+        </HorizontalScrollView>
+
+        <!--
+          Key numbers as a 2x2 grid of tiles. The margins are set here and not in the tile layout:
+          an <include> with its own width and height replaces all layout params of the included
+          root, so a margin there would be lost.
+        -->
+        <LinearLayout
+            android:id="@+id/tiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/tile1"
+                    layout="@layout/item_statistics_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/tile2"
+                    layout="@layout/item_statistics_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/tile3"
+                    layout="@layout/item_statistics_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1" />
+
+                <include
+                    android:id="@+id/tile4"
+                    layout="@layout/item_statistics_tile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--
+          One chart at a time. For a single entry the toggle switches between "relapses per month"
+          and "attempt lengths"; for "All" only the monthly chart exists, so the toggle is hidden
+          and chart_title is shown instead.
+        -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/chart_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            app:cardCornerRadius="16dp"
+            app:contentPadding="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/chart_toggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <Button
+                        android:id="@+id/chart_per_month"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:letterSpacing="0"
+                        android:text="@string/statistics_toggle_months"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/chart_attempts"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:letterSpacing="0"
+                        android:text="@string/statistics_toggle_attempts"
+                        android:textAllCaps="false" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <TextView
+                    android:id="@+id/chart_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/statistics_relapses_per_month"
+                    android:textStyle="bold" />
+
+                <com.katiearose.sobriety.views.BarChartView
+                    android:id="@+id/chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:layout_marginTop="10dp" />
+
+                <!-- What the axes mean, and the average below the attempt chart. -->
+                <TextView
+                    android:id="@+id/chart_caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Shown instead of the chart when there is nothing to draw (no entries, no relapses). -->
+        <TextView
+            android:id="@+id/no_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:gravity="center"
+            android:padding="20dp"
+            android:visibility="gone" />
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>
